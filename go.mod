@@ -1,4 +1,4 @@
-module github.com/blueturbo-ad/go-utils
+module github.com/blueturbo-ad/go-utils.git
 
 go 1.23.4
 
