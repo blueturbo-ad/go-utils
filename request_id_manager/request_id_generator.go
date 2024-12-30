@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"git.domob-inc.cn/blueturbo/go-utils.git/global"
+	"github.com/blueturbo-ad/go-utils.git/global"
 )
 
 const request_id_format string = "%s-%s-%04d"

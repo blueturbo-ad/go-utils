@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"git.domob-inc.cn/blueturbo/go-utils.git/global"
+	"github.com/blueturbo-ad/go-utils.git/global"
 
 	"github.com/stretchr/testify/assert"
 )

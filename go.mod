@@ -1,4 +1,4 @@
-module git.domob-inc.cn/blueturbo/go-utils.git
+module github.com/blueturbo-ad/go-utils.git
 
 go 1.23.4
 

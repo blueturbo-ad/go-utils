@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"git.domob-inc.cn/blueturbo/go-utils.git/config_manage"
+	"github.com/blueturbo-ad/go-utils.git/config_manage"
 
 	"github.com/VarusHsu/lumberjack"
 )

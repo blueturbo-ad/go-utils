@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"git.domob-inc.cn/blueturbo/go-utils.git/global"
+	"github.com/blueturbo-ad/go-utils.git/global"
 )
 
 const request_sub_id_formatter_split_count int = 4
