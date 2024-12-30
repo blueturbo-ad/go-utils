@@ -1,0 +1,51 @@
+curused: "Dev"
+Dev:
+  version: 1
+  zap_loggers:
+  - name: "handle_logger_1"
+    info: "log//handle_logger_info_1.log"
+    error: "log//handle_logger_err_1.log"
+    max_size: 10
+    max_backups: 5
+    max_age: 30
+    compress: false
+    level: 0
+    async: false
+
+
+  - name: "handle_logger_2"
+    info: "log//handle_logger_info_2.log"
+    error: "log//handle_logger_err_2.log"
+    max_size: 20
+    max_backups: 10
+    max_age: 60
+    compress: true
+    level: 0
+    async: false
+
+  - name: "handle_logger_3"
+    info: "log//handle_logger_info_3.log"
+    error: "log//handle_logger_err_3.log"
+    max_size: 15
+    max_backups: 7
+    max_age: 45
+    compress: false
+    level: 0
+    async: false
+Pro:
+  version: 1
+  zap_loggers:
+  - name: "handle_logger_1"
+    info: "log//handle_logger_info_1.log"
+    error: "log//handle_logger_err_1.log"
+    max_size: 10
+    max_backups: 5
+    max_age: 30
+    compress: false
+    level: 1
+    async: false
+Pre:
+Test:
+  
+
+
