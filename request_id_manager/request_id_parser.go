@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/blueturbo-ad/go-utils.git/global"
+	"github.com/blueturbo-ad/go-utils/global"
 )
 
 const request_id_formatter_split_count int = 3

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/blueturbo-ad/go-utils.git/global"
+	"github.com/blueturbo-ad/go-utils/global"
 )
 
 const (
