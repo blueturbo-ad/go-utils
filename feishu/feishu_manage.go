@@ -73,6 +73,7 @@ func GetInstance() *FeishuManage {
 			lock:   sync.RWMutex{},
 		}
 	})
+
 	return instance
 }
 
