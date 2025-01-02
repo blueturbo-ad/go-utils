@@ -1,10 +1,13 @@
 package etcdify
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"testing"
+
+	logger "github.com/blueturbo-ad/go-utils/zap_loggerex"
 )
 
 func TestNewWatcher(t *testing.T) {
@@ -16,11 +19,14 @@ func TestNewWatcher(t *testing.T) {
 		}
 		var p = fmt.Sprintf("%s\\..\\config\\etcdify_conf.yaml", dir)
 
-		info, err := NewWatcher(p, "Dev")
+		etcd, err := NewWatcher(p, "Dev")
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
+			return
 		}
-		fmt.Println(info)
+		loggerex := logger.GetSingleton()
+
+		etcd.WatchKey("Dev", context.Background(), "loggerex", loggerex.UpdateFromEtcd)
 
 	})
 }
