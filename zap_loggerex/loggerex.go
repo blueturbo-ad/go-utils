@@ -62,7 +62,7 @@ func GetLogger() *LoggerManager {
 }
 
 // 函数用于内存更新etcd配置
-func (l *LoggerManager) UpdateFromEtcd(env string, eventType string, key string, value string) error {
+func (l *LoggerManager) UpdateFromEtcd(env string, eventType string, key string, value string) {
 	fmt.Printf("Event Type: %s, Key: %s, Value: %s\n", eventType, key, value)
 
 	var err error
@@ -71,11 +71,10 @@ func (l *LoggerManager) UpdateFromEtcd(env string, eventType string, key string,
 		var e = new(config_manage.ZapLoggerConfig)
 		err = e.LoadMemoryZapConfig([]byte(value), env)
 		if err != nil {
-			return err
+			fmt.Println(err)
 		}
-		return l.UpdateLogger(e)
 	default:
-		return fmt.Errorf("unknown UpdateFromEtcd: %s", key)
+		return
 	}
 }
 
