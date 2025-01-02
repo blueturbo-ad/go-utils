@@ -1,0 +1,18 @@
+curused: "Dev"
+Dev:
+  hostname:
+    - "localhost:2379"
+    - "localhost1:2379"
+  ip: ""
+  port: "2379"
+  timeout: 5
+Pro:
+  hostname: 
+    - "localhost:2379"
+  ip: ""
+  port: "2379"
+  timeout: 5
+Pre:
+  # 这里尚未定义任何内容
+Test:
+  # 这里尚未定义任何内容

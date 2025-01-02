@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/blueturbo-ad/go-utils/config_manage"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -18,10 +19,16 @@ type EtcdWatcher struct {
 	timeout time.Duration
 }
 
-func NewWatcher(endpoints []string, timeout time.Duration) (*EtcdWatcher, error) {
+func NewWatcher(confPath string, env string) (*EtcdWatcher, error) {
+	var e = new(config_manage.EtcdifyConfig)
+	err := e.LoadConfig(confPath, env)
+	if err != nil {
+		return nil, err
+	}
+
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   endpoints,
-		DialTimeout: timeout,
+		Endpoints:   e.Hostname,
+		DialTimeout: time.Duration(e.Timeout),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create etcd client: %w", err)
@@ -29,7 +36,7 @@ func NewWatcher(endpoints []string, timeout time.Duration) (*EtcdWatcher, error)
 
 	return &EtcdWatcher{
 		client:  cli,
-		timeout: timeout,
+		timeout: time.Duration(e.Timeout),
 	}, nil
 }
 
