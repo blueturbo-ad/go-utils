@@ -11,6 +11,10 @@ import (
  * CurUsed 用于表示当前使用的环境
  * Dev 用于表示开发环境的配置
  */
+type ManagerConfigInterface interface {
+	LoadConfig(filePath string, env string) (*any, error)
+	LoadMemoryConfig(buf []byte, env string) (*any, error)
+}
 
 type ManagerConfig struct {
 	CurUsed string      ` yaml:"curused"`
