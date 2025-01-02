@@ -3,6 +3,7 @@ package etcdify
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
@@ -14,30 +15,48 @@ etcd 订阅处理
 
 	WatchKey 为订阅函数 通过传入的 key 进行订阅  callback为回调函数
 */
+
+var (
+	instance *EtcdWatcher
+	once     sync.Once
+)
+
 type EtcdWatcher struct {
 	client  *clientv3.Client
 	timeout time.Duration
 }
 
-func NewWatcher(confPath string, env string) (*EtcdWatcher, error) {
+func GetSingleton() *EtcdWatcher {
+	once.Do(func() {
+		instance = new(EtcdWatcher)
+	})
+	return instance
+}
+
+func GetEtcder() *EtcdWatcher {
+	return GetSingleton()
+}
+
+// 第一次调用接口  以后使用GetEtcder获取对象
+func NewWatcher(confPath string, env string) error {
 	var e = new(config_manage.EtcdifyConfig)
 	err := e.LoadConfig(confPath, env)
 	if err != nil {
-		return nil, err
+		return err
 	}
+
+	GetSingleton().timeout = time.Duration(e.Timeout)
 
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   e.Hostname,
 		DialTimeout: time.Duration(e.Timeout),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create etcd client: %w", err)
+		return fmt.Errorf("failed to create etcd client: %w", err)
 	}
 
-	return &EtcdWatcher{
-		client:  cli,
-		timeout: time.Duration(e.Timeout),
-	}, nil
+	GetSingleton().client = cli
+	return nil
 }
 
 func (w *EtcdWatcher) WatchKey(env string, ctx context.Context, key string, callback func(env string, eventType string, key string, value string)) {

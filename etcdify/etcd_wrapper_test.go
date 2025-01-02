@@ -19,13 +19,18 @@ func TestNewWatcher(t *testing.T) {
 		}
 		var p = fmt.Sprintf("%s\\..\\config\\etcdify_conf.yaml", dir)
 
-		etcd, err := NewWatcher(p, "Dev")
+		err = NewWatcher(p, "Dev")
+		/*info := GetEtcder()
+		if info != etcd {
+			return
+		}*/
+
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
 			return
 		}
 		loggerex := logger.GetSingleton()
-
+		etcd := GetEtcder()
 		etcd.WatchKey("Dev", context.Background(), "loggerex", loggerex.UpdateFromEtcd)
 
 	})
