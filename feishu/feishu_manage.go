@@ -66,6 +66,7 @@ type FeishuResponse struct {
 }
 
 func GetInstance() *FeishuManage {
+
 	once.Do(func() {
 		instance = &FeishuManage{
 			Config: [2]*config_manage.FeishuConfig{new(config_manage.FeishuConfig), new(config_manage.FeishuConfig)},
