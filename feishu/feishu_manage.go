@@ -55,6 +55,7 @@ var ColorMap = map[string]string{
 	"warning": "orange",
 	"error":   "red",
 	"fail":    "carmine",
+	"info":    "green",
 }
 
 type FeishuResponse struct {
