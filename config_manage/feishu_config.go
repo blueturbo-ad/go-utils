@@ -7,10 +7,7 @@ import (
 )
 
 type Config struct {
-	Level    int    `yaml:"level"`
-	FialUrl  string `yaml:"fail_url"`
-	ErrorUrl string `yaml:"error_url"`
-	WarnUrl  string `yaml:"warn_url"`
+	Url string `yaml:"url"`
 }
 
 // Config 用于表示整个配置文件
