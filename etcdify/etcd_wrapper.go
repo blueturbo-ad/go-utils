@@ -60,8 +60,8 @@ func NewWatcher(confPath string, env string) error {
 }
 
 func (w *EtcdWatcher) WatchKey(env string, ctx context.Context, key string, callback func(env string, eventType string, key string, value string)) {
-	watchChan := w.client.Watch(ctx, key)
 	go func() {
+		watchChan := w.client.Watch(ctx, key)
 		for watchResp := range watchChan {
 			for _, event := range watchResp.Events {
 				callback(env, event.Type.String(), string(event.Kv.Key), string(event.Kv.Value))
