@@ -22,8 +22,8 @@ var (
 )
 
 type EtcdWatcher struct {
-	client  *clientv3.Client
-	timeout time.Duration
+	Client  *clientv3.Client
+	Timeout time.Duration
 }
 
 func GetSingleton() *EtcdWatcher {
@@ -45,7 +45,7 @@ func NewWatcher(confPath string, env string) error {
 		return err
 	}
 
-	GetSingleton().timeout = time.Duration(e.Timeout)
+	GetSingleton().Timeout = time.Duration(e.Timeout)
 
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   e.Hostname,
@@ -55,13 +55,13 @@ func NewWatcher(confPath string, env string) error {
 		return fmt.Errorf("failed to create etcd client: %w", err)
 	}
 
-	GetSingleton().client = cli
+	GetSingleton().Client = cli
 	return nil
 }
 
 func (w *EtcdWatcher) WatchKey(env string, ctx context.Context, key string, callback func(env string, eventType string, key string, value string)) {
 	go func() {
-		watchChan := w.client.Watch(ctx, key)
+		watchChan := w.Client.Watch(ctx, key)
 		for watchResp := range watchChan {
 			for _, event := range watchResp.Events {
 				callback(env, event.Type.String(), string(event.Kv.Key), string(event.Kv.Value))
@@ -71,5 +71,5 @@ func (w *EtcdWatcher) WatchKey(env string, ctx context.Context, key string, call
 }
 
 func (w *EtcdWatcher) Close() error {
-	return w.client.Close()
+	return w.Client.Close()
 }
