@@ -19,7 +19,7 @@ type EtcdifyConfig struct {
 
 func (l *EtcdifyConfig) LoadConfig(filePath string, env string) error {
 	var c = new(ManagerConfig)
-	info, err := c.LoadConfig(filePath, env)
+	info, err := c.LoadFileConfig(filePath, env)
 	if err != nil {
 		return err
 	}

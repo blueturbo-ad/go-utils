@@ -1,10 +1,13 @@
 package config_manage
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
 	"gopkg.in/yaml.v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 /* Config 用于表示整个配置文件
@@ -12,8 +15,9 @@ import (
  * Dev 用于表示开发环境的配置
  */
 type ManagerConfigInterface interface {
-	LoadConfig(filePath string, env string) (*any, error)
+	LoadFileConfig(filePath string, env string) (*any, error)
 	LoadMemoryConfig(buf []byte, env string) (*any, error)
+	LoadK8sConfigMap(env string) (*any, error)
 }
 
 type ManagerConfig struct {
@@ -30,7 +34,30 @@ const (
 	KeyFieldTag       = "yaml"
 )
 
-func (c *ManagerConfig) LoadConfig(filePath string, env string) (*any, error) {
+func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (*any, error) {
+	// 读取 YAML 文件
+	k8s_client := k8sclient.GetSingleton().GetClient()
+	if k8s_client == nil {
+		return nil, fmt.Errorf("k8s client is nil")
+	}
+	configMap, err := k8s_client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMapName, metav1.GetOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	var data []byte
+	data, err = yaml.Marshal(configMap.Data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal inmap: %v", err)
+	}
+	err = yaml.Unmarshal(data, &c)
+	if err != nil {
+		return nil, fmt.Errorf(ErroryamlNotfound, err)
+	}
+
+	return c.GetEnvironmentConfig(env)
+}
+
+func (c *ManagerConfig) LoadFileConfig(filePath string, env string) (*any, error) {
 	// 读取 YAML 文件
 	data, err := os.ReadFile(filePath)
 	if err != nil {

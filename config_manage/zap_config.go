@@ -28,9 +28,27 @@ type ZapLoggerConfig struct {
 	Version string         `yaml:"version"`
 }
 
+func (l *ZapLoggerConfig) LoadK8sConfigMap(namespace, configMapName, env string) error {
+	var c = new(ManagerConfig)
+	info, err := c.LoadK8sConfigMap(namespace, configMapName, env)
+	if err != nil {
+		return err
+	}
+	inmap := (*info).(map[string]interface{})
+	data, err := yaml.Marshal(inmap)
+	if err != nil {
+		return fmt.Errorf("failed to marshal inmap: %v", err)
+	}
+	err = yaml.Unmarshal(data, &l.Loggers)
+	if err != nil {
+		return fmt.Errorf(ErroryamlNotfound, err)
+	}
+	return nil
+}
+
 func (l *ZapLoggerConfig) LoadZapConfig(filePath string, env string) error {
 	var c = new(ManagerConfig)
-	info, err := c.LoadConfig(filePath, env)
+	info, err := c.LoadFileConfig(filePath, env)
 	if err != nil {
 		return err
 	}
