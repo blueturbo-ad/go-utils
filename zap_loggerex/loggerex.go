@@ -3,6 +3,7 @@ package zap_loggerex
 import (
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
+	"github.com/blueturbo-ad/go-utils/environment"
 
 	"github.com/VarusHsu/lumberjack"
 )
@@ -94,6 +96,8 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 	defer l.rwMutex.Unlock()
 	var loger = new(LoggerEx) //生成新的数据
 	for _, value := range config.Loggers {
+		value.Info = strings.ReplaceAll(value.Info, "{POD_NAME}", environment.GetPodNameInfo())
+		value.Error = strings.ReplaceAll(value.Error, "{POD_NAME}", environment.GetPodNameInfo())
 		zapLogger := newZapLogger(&value)
 		if zapLogger == nil {
 			return nil

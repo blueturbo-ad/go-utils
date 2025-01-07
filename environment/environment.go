@@ -110,6 +110,9 @@ func GetUniqueId() string {
 func GetIntanceIp() string {
 	return GetSingleton().GetIntanceIp()
 }
+func GetPodNameInfo() string {
+	return GetSingleton().GetPodName()
+}
 
 func (e *Environment) GetWorkName() string {
 	return e.workName
@@ -152,6 +155,9 @@ func (e *Environment) GetMacAddresses() []string {
 func (e *Environment) GetUniqueId() string {
 	return e.uniqueId
 }
+func (e *Environment) GetPodName() string {
+	return e.podInfo.PodName
+}
 
 func (e *Environment) initEnvironment() {
 	e.initEnv()
@@ -163,6 +169,7 @@ func (e *Environment) initEnvironment() {
 	e.initPodInfo()
 	e.initIntranetIP()
 	e.initMacAddresses()
+	e.initPodName()
 	podInfoByte, err := json.Marshal(e.podInfo)
 	if err != nil {
 		panic(err)
@@ -242,6 +249,10 @@ func (e *Environment) initPodInfo() {
 	}
 	e.podInfo = &podInfo
 	e.uniqueId = fmt.Sprintf("%s_%s_%s", podInfo.NodeName, podInfo.NameSpace, podInfo.PodName)
+}
+
+func (e *Environment) initPodName() {
+	e.podInfo.PodName = os.Getenv(KeyPodName)
 }
 
 func (e *Environment) initIntranetIP() {
