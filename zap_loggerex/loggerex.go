@@ -2,7 +2,6 @@ package zap_loggerex
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
 	"github.com/blueturbo-ad/go-utils/environment"
+	"github.com/micro/go-micro/v2/util/log"
 
 	"github.com/VarusHsu/lumberjack"
 )
@@ -63,6 +63,15 @@ func GetLogger() *LoggerManager {
 	return GetSingleton()
 }
 
+func (l *LoggerManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
+	var e = new(config_manage.ZapLoggerConfig)
+	err := e.LoadK8sConfigMap(configMapName, env)
+	if err != nil {
+		log.Error(err)
+	}
+	return l.UpdateLogger(e)
+}
+
 // 函数用于内存更新etcd配置
 func (l *LoggerManager) UpdateFromEtcd(env string, eventType string, key string, value string) {
 	fmt.Printf("Event Type: %s, Key: %s, Value: %s\n", eventType, key, value)
@@ -73,7 +82,10 @@ func (l *LoggerManager) UpdateFromEtcd(env string, eventType string, key string,
 		var e = new(config_manage.ZapLoggerConfig)
 		err = e.LoadMemoryZapConfig([]byte(value), env)
 		if err != nil {
-			fmt.Println(err)
+			log.Error("failed to load memory config", err)
+		}
+		if err := l.UpdateLogger(e); err != nil {
+			log.Error("failed to update logger", err)
 		}
 	default:
 		return

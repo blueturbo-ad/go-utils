@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
+	"github.com/micro/go-micro/v2/util/log"
 )
 
 // 小于等于0 是 warning error fail 大于等于1 error fail  大于等于2 fail
@@ -79,8 +80,17 @@ func GetInstance() *FeishuManage {
 	return instance
 }
 
+func (l *FeishuManage) UpdateLoadK8sConfigMap(configMapName, env string) error {
+	var e = new(config_manage.FeishuConfig)
+	err := e.LoadK8sConfigMap(configMapName, env)
+	if err != nil {
+		log.Error(err)
+	}
+	return l.UpdateLogger(e)
+}
+
 // 函数用于内存更新etcd配置
-func (l *FeishuManage) UpdateFromEtcd(env string, eventType string, key string, value string) error {
+func (l *FeishuManage) UpdateFromEtcd(env string, eventType string, key string, value string) {
 	fmt.Printf("Event Type: %s, Key: %s, Value: %s\n", eventType, key, value)
 
 	var err error
@@ -89,11 +99,13 @@ func (l *FeishuManage) UpdateFromEtcd(env string, eventType string, key string, 
 		var e = new(config_manage.FeishuConfig)
 		err = e.LoadMemoryConfig([]byte(value), env)
 		if err != nil {
-			return err
+			log.Error("failed to load memory config", err)
 		}
-		return l.UpdateLogger(e)
+		if err := l.UpdateLogger(e); err != nil {
+			log.Error("failed to update logger", err)
+		}
 	default:
-		return fmt.Errorf("unknown UpdateFromEtcd: %s", key)
+		return
 	}
 }
 

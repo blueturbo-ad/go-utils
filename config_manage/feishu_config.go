@@ -3,6 +3,7 @@ package config_manage
 import (
 	"fmt"
 
+	"github.com/blueturbo-ad/go-utils/environment"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,8 +17,9 @@ type FeishuConfig struct {
 	Version string  `yaml:"version"`
 }
 
-func (l *FeishuConfig) LoadK8sConfigMap(namespace, configMapName, env string) error {
+func (l *FeishuConfig) LoadK8sConfigMap(configMapName, env string) error {
 	var c = new(ManagerConfig)
+	namespace := environment.GetSingleton().GetNamespace()
 	info, err := c.LoadK8sConfigMap(namespace, configMapName, env)
 	if err != nil {
 		return err

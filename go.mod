@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/VarusHsu/lumberjack v0.0.0-20230217081214-5245b3ab398a
+	github.com/micro/go-micro/v2 v2.9.1
 	github.com/stretchr/testify v1.10.0
 	go.etcd.io/etcd/client/v3 v3.5.17
 	go.uber.org/zap v1.27.0
