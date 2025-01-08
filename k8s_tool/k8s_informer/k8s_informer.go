@@ -69,6 +69,7 @@ func (i *Informer) Run() {
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
+			loggerex.GetSingleton().Info("system_logger", "update config map old obj: %s mew obj: %s", oldObj, newObj)
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "add config map: %s", newConfigMap.Name)
