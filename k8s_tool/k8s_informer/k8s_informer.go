@@ -55,6 +55,7 @@ func (i *Informer) Run() {
 		AddFunc: func(obj interface{}) {
 			configMap := obj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
+			loggerex.GetSingleton().Info("framework_logger", "add config map: %s", configMap.Name)
 			if err := i.CacheInitFuns[configMap.Name](configMap.Name, env); err != nil {
 				loggerex.GetSingleton().Error("framework_logger", "add config map error : %s", err.Error())
 			}
@@ -62,6 +63,7 @@ func (i *Informer) Run() {
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
+			loggerex.GetSingleton().Info("framework_logger", "update config map: %s", newConfigMap.Name)
 			if err := i.CacheInitFuns[newConfigMap.Name](newConfigMap.Name, env); err != nil {
 				loggerex.GetSingleton().Error("framework_logger", "add config map error : %s", err.Error())
 			}
