@@ -37,6 +37,7 @@ func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env 
 
 func (i *Informer) SetUp() error {
 	var err error
+	i.CacheInitFuns = make(map[string]func(configMapName, env string) error)
 	i.k8sClient = k8sclient.GetSingleton().GetClient()
 	if err != nil {
 		return err
