@@ -50,6 +50,7 @@ type Environment struct {
 	macAddresses []string
 	podInfo      *PodInfo
 	uniqueId     string
+	namespace    string
 }
 
 type PodInfo struct {
@@ -114,6 +115,10 @@ func GetPodNameInfo() string {
 	return GetSingleton().GetPodName()
 }
 
+func GetPodNameSpace() string {
+	return GetSingleton().GetNamespace()
+}
+
 func (e *Environment) GetWorkName() string {
 	return e.workName
 }
@@ -159,6 +164,10 @@ func (e *Environment) GetPodName() string {
 	return e.podInfo.PodName
 }
 
+func (e *Environment) GetNamespace() string {
+	return e.podInfo.NameSpace
+}
+
 func (e *Environment) initEnvironment() {
 	e.initEnv()
 	e.initRegion()
@@ -170,6 +179,7 @@ func (e *Environment) initEnvironment() {
 	e.initIntranetIP()
 	e.initMacAddresses()
 	e.initPodName()
+	e.initNameSpace()
 	podInfoByte, err := json.Marshal(e.podInfo)
 	if err != nil {
 		panic(err)
@@ -253,6 +263,10 @@ func (e *Environment) initPodInfo() {
 
 func (e *Environment) initPodName() {
 	e.podInfo.PodName = os.Getenv(KeyPodName)
+}
+
+func (e *Environment) initNameSpace() {
+	e.podInfo.NameSpace = os.Getenv(KeyNameSpace)
 }
 
 func (e *Environment) initIntranetIP() {

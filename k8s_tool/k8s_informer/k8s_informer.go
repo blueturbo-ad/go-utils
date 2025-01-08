@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/blueturbo-ad/go-utils/environment"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
 	loggerex "github.com/blueturbo-ad/go-utils/zap_loggerex"
 	corev1 "k8s.io/api/core/v1"
@@ -26,11 +27,11 @@ func GetInformerSingleton() *Informer {
 }
 
 type Informer struct {
-	CacheInitFuns map[string]func() error
+	CacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
 }
 
-func (i *Informer) RegisterCacheInitFun(key string, fun func() error) {
+func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
 	i.CacheInitFuns[key] = fun
 }
 
@@ -53,13 +54,15 @@ func (i *Informer) Run() {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			configMap := obj.(*corev1.ConfigMap)
-			if err := i.CacheInitFuns[configMap.Name](); err != nil {
+			env := environment.GetSingleton().GetEnv()
+			if err := i.CacheInitFuns[configMap.Name](configMap.Name, env); err != nil {
 				loggerex.GetSingleton().Error("framework_logger", "add config map error : %s", err.Error())
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
-			if err := i.CacheInitFuns[newConfigMap.Name](); err != nil {
+			env := environment.GetSingleton().GetEnv()
+			if err := i.CacheInitFuns[newConfigMap.Name](newConfigMap.Name, env); err != nil {
 				loggerex.GetSingleton().Error("framework_logger", "add config map error : %s", err.Error())
 			}
 		},
