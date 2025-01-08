@@ -36,7 +36,7 @@ func (l *ZapLoggerConfig) LoadK8sConfigMap(configMapName, env string) error {
 	if err != nil {
 		return err
 	}
-	if info == nil {
+	if (*info) == nil {
 		return fmt.Errorf("info is nil，")
 	}
 	inmap := (*info).(map[string]interface{})

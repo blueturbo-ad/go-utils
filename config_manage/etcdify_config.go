@@ -23,7 +23,7 @@ func (l *EtcdifyConfig) LoadConfig(filePath string, env string) error {
 	if err != nil {
 		return err
 	}
-	if info == nil {
+	if (*info) == nil {
 		return fmt.Errorf("info is nil，")
 	}
 	inmap := (*info).(map[string]interface{})
