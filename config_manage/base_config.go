@@ -42,7 +42,7 @@ func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (
 	}
 	configMap, err := k8s_client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMapName, metav1.GetOptions{})
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("failed to get configmap: %v", err)
 	}
 	var data []byte
 	data, err = yaml.Marshal(configMap.Data)
