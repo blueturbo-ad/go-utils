@@ -1,4 +1,4 @@
-package k8stool
+package k8s_informer
 
 import (
 	"fmt"
