@@ -25,7 +25,7 @@ func (l *FeishuConfig) LoadK8sConfigMap(configMapName, env string) error {
 		return err
 	}
 	if info == nil {
-		return fmt.Errorf("info is nil")
+		return fmt.Errorf("info is nil，")
 	}
 	inmap := (*info).(map[string]interface{})
 	data, err := yaml.Marshal(inmap)
