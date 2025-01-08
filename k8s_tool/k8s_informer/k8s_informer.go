@@ -56,17 +56,17 @@ func (i *Informer) Run() {
 		AddFunc: func(obj interface{}) {
 			configMap := obj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
-			loggerex.GetSingleton().Info("framework_logger", "add config map: %s", configMap.Name)
+			loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
 			if err := i.CacheInitFuns[configMap.Name](configMap.Name, env); err != nil {
-				loggerex.GetSingleton().Error("framework_logger", "add config map error : %s", err.Error())
+				loggerex.GetSingleton().Error("system_logger", "add config map error : %s", err.Error())
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
-			loggerex.GetSingleton().Info("framework_logger", "update config map: %s", newConfigMap.Name)
+			loggerex.GetSingleton().Info("system_logger", "update config map: %s", newConfigMap.Name)
 			if err := i.CacheInitFuns[newConfigMap.Name](newConfigMap.Name, env); err != nil {
-				loggerex.GetSingleton().Error("framework_logger", "add config map error : %s", err.Error())
+				loggerex.GetSingleton().Error("system_logger", "add config map error : %s", err.Error())
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
@@ -81,6 +81,6 @@ func (i *Informer) Run() {
 	go informer.Run(stopCh)
 	// 等待缓存同步
 	if !cache.WaitForCacheSync(stopCh, informer.HasSynced) {
-		loggerex.GetSingleton().Error("framework_logger", "Error waiting for cache to sync")
+		loggerex.GetSingleton().Error("system_logger", "Error waiting for cache to sync")
 	}
 }
