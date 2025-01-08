@@ -9,9 +9,10 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"log"
+
 	"github.com/blueturbo-ad/go-utils/config_manage"
 	"github.com/blueturbo-ad/go-utils/environment"
-	"github.com/micro/go-micro/v2/util/log"
 
 	"github.com/VarusHsu/lumberjack"
 )
@@ -67,7 +68,7 @@ func (l *LoggerManager) UpdateLoadK8sConfigMap(configMapName, env string) error 
 	var e = new(config_manage.ZapLoggerConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {
-		log.Error(err)
+		log.Printf("configmap error %s", err.Error())
 	}
 	return l.UpdateLogger(e)
 }
@@ -82,10 +83,10 @@ func (l *LoggerManager) UpdateFromEtcd(env string, eventType string, key string,
 		var e = new(config_manage.ZapLoggerConfig)
 		err = e.LoadMemoryZapConfig([]byte(value), env)
 		if err != nil {
-			log.Error("failed to load memory config", err)
+			log.Printf("failed to load memory config", err)
 		}
 		if err := l.UpdateLogger(e); err != nil {
-			log.Error("failed to update logger", err)
+			log.Printf("failed to update logger", err)
 		}
 	default:
 		return
