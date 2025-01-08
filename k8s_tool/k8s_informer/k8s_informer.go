@@ -90,6 +90,7 @@ func (i *Informer) Run() {
 	// 启动 Informer
 	stopCh := make(chan struct{})
 	defer close(stopCh)
+	go factory.Start(stopCh)
 	go informer.Run(stopCh)
 	// 等待缓存同步
 	if !cache.WaitForCacheSync(stopCh, informer.HasSynced) {
