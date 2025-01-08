@@ -27,17 +27,17 @@ func GetInformerSingleton() *Informer {
 }
 
 type Informer struct {
-	CacheInitFuns map[string]func(configMapName, env string) error
+	cacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
-	i.CacheInitFuns[key] = fun
+	i.cacheInitFuns[key] = fun
 }
 
 func (i *Informer) SetUp() error {
 	var err error
-	i.CacheInitFuns = make(map[string]func(configMapName, env string) error)
+	i.cacheInitFuns = make(map[string]func(configMapName, env string) error)
 	i.k8sClient = k8sclient.GetSingleton().GetClient()
 	if err != nil {
 		return err
@@ -47,7 +47,9 @@ func (i *Informer) SetUp() error {
 
 func (i *Informer) Run() {
 	// 创建 Informer 工厂
-	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, time.Minute*10, informers.WithNamespace("default"))
+	namespace := environment.GetSingleton().GetNamespace()
+	loggerex.GetSingleton().Info("system_logger", "namespace: %s", namespace)
+	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, time.Minute*10, informers.WithNamespace(namespace))
 
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
@@ -57,7 +59,7 @@ func (i *Informer) Run() {
 			configMap := obj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
-			if err := i.CacheInitFuns[configMap.Name](configMap.Name, env); err != nil {
+			if err := i.cacheInitFuns[configMap.Name](configMap.Name, env); err != nil {
 				loggerex.GetSingleton().Error("system_logger", "add config map error : %s", err.Error())
 			}
 		},
@@ -65,7 +67,7 @@ func (i *Informer) Run() {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "update config map: %s", newConfigMap.Name)
-			if err := i.CacheInitFuns[newConfigMap.Name](newConfigMap.Name, env); err != nil {
+			if err := i.cacheInitFuns[newConfigMap.Name](newConfigMap.Name, env); err != nil {
 				loggerex.GetSingleton().Error("system_logger", "add config map error : %s", err.Error())
 			}
 		},
