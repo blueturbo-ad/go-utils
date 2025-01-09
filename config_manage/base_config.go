@@ -36,14 +36,11 @@ const (
 
 func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (*any, error) {
 	// 读取 YAML 文件
-	fmt.Println("namespace", namespace, "configMapName", configMapName, "env", env, "c", c)
 	k8s_client := k8sclient.GetSingleton().GetClient()
-	fmt.Println("k8s_client", k8s_client)
 	if k8s_client == nil {
 		return nil, fmt.Errorf("k8s client is nil")
 	}
 	configMap, err := k8s_client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMapName, metav1.GetOptions{})
-	fmt.Println("base configMap", configMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get configmap: %v", err)
 	}
@@ -58,7 +55,6 @@ func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (
 		fmt.Println("base error ", err.Error())
 		return nil, fmt.Errorf(ErroryamlNotfound, err)
 	}
-	fmt.Println("base c\n", c)
 	return c.GetEnvironmentConfig(env)
 }
 
@@ -97,7 +93,6 @@ func (c *ManagerConfig) GetEnvironmentConfig(env string) (*any, error) {
 	case "Dev":
 		return &c.Dev, nil
 	case "Pro":
-		fmt.Printf("env is %s, data is %s", env, c.Pro)
 		return &c.Pro, nil
 	case "Pre":
 		return &c.Pro, nil
