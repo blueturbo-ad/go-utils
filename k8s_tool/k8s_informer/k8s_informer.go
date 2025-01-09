@@ -2,7 +2,10 @@ package k8s_informer
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/blueturbo-ad/go-utils/environment"
@@ -91,9 +94,14 @@ func (i *Informer) Run() {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 	go factory.Start(stopCh)
+
 	go informer.Run(stopCh)
 	// 等待缓存同步
 	if !cache.WaitForCacheSync(stopCh, informer.HasSynced) {
 		loggerex.GetSingleton().Error("system_logger", "Error waiting for cache to sync")
 	}
+	// 等待信号以退出程序
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	<-sigs
 }
