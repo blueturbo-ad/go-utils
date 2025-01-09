@@ -62,7 +62,6 @@ func (i *Informer) Run() {
 			configMap := obj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
-			loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
 			if initFunc, exists := i.cacheInitFuns[configMap.Name]; exists {
 				if err := initFunc(configMap.Name, env); err != nil {
 					loggerex.GetSingleton().Error("system_logger", "add config map error : %s", err.Error())
@@ -72,13 +71,12 @@ func (i *Informer) Run() {
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
-			loggerex.GetSingleton().Info("system_logger", "update config map old obj: %s mew obj: %s", oldObj, newObj)
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
-			loggerex.GetSingleton().Info("system_logger", "add config map: %s", newConfigMap.Name)
+			loggerex.GetSingleton().Info("system_logger", "add config map: %s \n", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
 				if err := initFunc(newConfigMap.Name, env); err != nil {
-					loggerex.GetSingleton().Error("system_logger", "add config map error : %s", err.Error())
+					loggerex.GetSingleton().Error("system_logger", "update config map error : %s \n", err.Error())
 				}
 			} else {
 				loggerex.GetSingleton().Error("system_logger", "No init function found for config map: %s", newConfigMap.Name)
@@ -93,7 +91,6 @@ func (i *Informer) Run() {
 	// 启动 Informer
 	stopCh := make(chan struct{})
 	defer close(stopCh)
-	go factory.Start(stopCh)
 
 	go informer.Run(stopCh)
 	// 等待缓存同步

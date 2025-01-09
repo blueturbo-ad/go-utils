@@ -84,7 +84,7 @@ func (l *FeishuManage) UpdateLoadK8sConfigMap(configMapName, env string) error {
 	var e = new(config_manage.FeishuConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
 	return l.UpdateLogger(e)
 }
