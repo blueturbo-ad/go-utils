@@ -54,11 +54,11 @@ func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (
 		return nil, fmt.Errorf("failed to marshal inmap: %v", err)
 	}
 	err = yaml.Unmarshal(data, &c)
-	fmt.Println("base error ", err.Error())
 	if err != nil {
+		fmt.Println("base error ", err.Error())
 		return nil, fmt.Errorf(ErroryamlNotfound, err)
 	}
-
+	fmt.Println("base c", c)
 	return c.GetEnvironmentConfig(env)
 }
 
@@ -97,6 +97,7 @@ func (c *ManagerConfig) GetEnvironmentConfig(env string) (*any, error) {
 	case "Dev":
 		return &c.Dev, nil
 	case "Pro":
+		fmt.Printf("env is %s, data is %s", env, c.Pro)
 		return &c.Pro, nil
 	case "Pre":
 		return &c.Pro, nil
