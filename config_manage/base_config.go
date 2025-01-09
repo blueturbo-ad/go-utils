@@ -51,14 +51,9 @@ func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (
 	if !ok {
 		return nil, fmt.Errorf("configmap %s not found", configMapName)
 	}
-	var data []byte
-	data, err = yaml.Marshal(conf)
-	fmt.Printf("base data, marshal %s, configMap %v\n", string(data), conf)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal inmap: %v", err)
-	}
-	fmt.Printf("base data: %s", data)
-	err = yaml.Unmarshal(data, &c)
+
+	fmt.Printf("base data: %s", conf)
+	err = yaml.Unmarshal([]byte(conf), &c)
 	if err != nil {
 		fmt.Println("base error ", err.Error())
 		return nil, fmt.Errorf(ErroryamlNotfound, err)
