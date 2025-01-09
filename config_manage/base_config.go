@@ -36,6 +36,7 @@ const (
 
 func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (*any, error) {
 	// 读取 YAML 文件
+	fmt.Println("namespace", namespace, "configMapName", configMapName, "env", env, "c", c)
 	k8s_client := k8sclient.GetSingleton().GetClient()
 	fmt.Println("k8s_client", k8s_client)
 	if k8s_client == nil {
