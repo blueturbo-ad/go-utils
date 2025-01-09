@@ -73,7 +73,7 @@ func (i *Informer) Run() {
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
-			loggerex.GetSingleton().Info("system_logger", "add config map: %s \n", newConfigMap.Name)
+			loggerex.GetSingleton().Info("system_logger", "update config map: %s \n", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
 				if err := initFunc(newConfigMap.Name, env); err != nil {
 					loggerex.GetSingleton().Error("system_logger", "update config map error : %s \n", err.Error())

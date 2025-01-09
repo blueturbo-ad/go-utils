@@ -37,19 +37,23 @@ const (
 func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (*any, error) {
 	// 读取 YAML 文件
 	k8s_client := k8sclient.GetSingleton().GetClient()
+	fmt.Println("k8s_client", k8s_client)
 	if k8s_client == nil {
 		return nil, fmt.Errorf("k8s client is nil")
 	}
 	configMap, err := k8s_client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMapName, metav1.GetOptions{})
+	fmt.Println("base configMap", configMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get configmap: %v", err)
 	}
 	var data []byte
 	data, err = yaml.Marshal(configMap.Data)
+	fmt.Printf("base data, marshal %s, configMap %v\n", string(data), configMap.Data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal inmap: %v", err)
 	}
 	err = yaml.Unmarshal(data, &c)
+	fmt.Println("base error ", err.Error())
 	if err != nil {
 		return nil, fmt.Errorf(ErroryamlNotfound, err)
 	}
