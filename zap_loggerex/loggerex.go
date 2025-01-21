@@ -108,9 +108,12 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 	l.rwMutex.Lock()
 	defer l.rwMutex.Unlock()
 	var loger = new(LoggerEx) //生成新的数据
+	now := time.Now().Format("2006-01-02")
 	for _, value := range config.Loggers {
 		value.Info = strings.ReplaceAll(value.Info, "{POD_NAME}", environment.GetPodNameInfo())
 		value.Error = strings.ReplaceAll(value.Error, "{POD_NAME}", environment.GetPodNameInfo())
+		value.Info = strings.ReplaceAll(value.Info, "{POD_NAME}", now)
+		value.Error = strings.ReplaceAll(value.Info, "{POD_NAME}", now)
 		zapLogger := newZapLogger(&value)
 		if zapLogger == nil {
 			return nil
