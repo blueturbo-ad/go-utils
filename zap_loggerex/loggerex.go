@@ -14,7 +14,8 @@ import (
 	"github.com/blueturbo-ad/go-utils/config_manage"
 	"github.com/blueturbo-ad/go-utils/environment"
 
-	"github.com/VarusHsu/lumberjack"
+	// "github.com/VarusHsu/lumberjack"
+	"github.com/blueturbo-ad/go-utils/lumberjack"
 )
 
 /* LoggerWrapper 日志包装器
