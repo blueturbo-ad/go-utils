@@ -166,12 +166,12 @@ func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.Wr
 	var hookFunc func(string) = nil
 
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   info,
-		MaxSize:    conf.MaxSize,
-		MaxBackups: conf.MaxBackups,
-		MaxAge:     conf.MaxAge,
-		Compress:   conf.Compress,
-		Hook:       hookFunc,
+		Filename: info,
+		MaxSize:  conf.MaxSize,
+		// MaxBackups: conf.MaxBackups,
+		// MaxAge:   conf.MaxAge,
+		Compress: conf.Compress,
+		Hook:     hookFunc,
 	}
 	if conf.Async {
 		syncWriter := &zapcore.BufferedWriteSyncer{
