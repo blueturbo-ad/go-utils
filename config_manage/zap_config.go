@@ -44,6 +44,7 @@ func (l *ZapLoggerConfig) LoadK8sConfigMap(configMapName, env string) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal inmap: %v", err)
 	}
+
 	err = yaml.Unmarshal(data, &l)
 	if err != nil {
 		return fmt.Errorf(ErroryamlNotfound, err)

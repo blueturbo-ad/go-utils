@@ -1,8 +1,10 @@
 package config_manage
 
 import (
+	"os"
 	"testing"
 
+	"github.com/blueturbo-ad/go-utils/environment"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
 	"gopkg.in/yaml.v3"
 )
@@ -16,7 +18,9 @@ type Configs struct {
 }
 
 func TestBaseConfig(t *testing.T) {
-
+	environment.Init()
+	os.Setenv("POD_NAMESPACE", "dsp-ns")
+	k8sclient.GetSingleton().SetUp()
 	t.Run("TestBaseFeishuConfig", func(t *testing.T) {
 		c := new(ManagerConfig)
 		k8sclient.GetSingleton().SetUp()

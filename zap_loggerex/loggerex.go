@@ -83,10 +83,10 @@ func (l *LoggerManager) UpdateFromEtcd(env string, eventType string, key string,
 		var e = new(config_manage.ZapLoggerConfig)
 		err = e.LoadMemoryZapConfig([]byte(value), env)
 		if err != nil {
-			log.Printf("failed to load memory config", err)
+			log.Printf("failed to load memory config: %v", err)
 		}
 		if err := l.UpdateLogger(e); err != nil {
-			log.Printf("failed to update logger", err)
+			log.Printf("failed to update logger: %v", err)
 		}
 	default:
 		return

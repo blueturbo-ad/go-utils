@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/blueturbo-ad/go-utils/environment"
+	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
 )
 
 // func BenchmarkUpdateFromFile(b *testing.B) {
@@ -29,6 +30,8 @@ func TestGetLogger(t *testing.T) {
 	// Setup a sample Config instance
 	environment.Init()
 	os.Setenv("POD_NAME", "test")
+	os.Setenv("POD_NAMESPACE", "dsp-ns")
+	k8sclient.GetSingleton().SetUp()
 	t.Run("test EnvironmentConfig", func(t *testing.T) {
 		logger := GetSingleton()
 		dir, err := os.Getwd()
@@ -57,6 +60,14 @@ func TestGetLogger(t *testing.T) {
 		logger.Warn("handle_logger_3", "3333")
 		logger.Error("handle_logger_3", "4444")
 
+	})
+
+	t.Run("testBaseLoggerConfig1", func(t *testing.T) {
+		// var e = new(ZapLoggerConfig)
+		// e.LoadK8sConfigMap("dsp-logger", "Pro")
+		logger := GetSingleton()
+		logger.UpdateLoadK8sConfigMap("dsp-logger", "Pro")
+		logger.Debug("handle_logger_1", "1111")
 	})
 
 }
