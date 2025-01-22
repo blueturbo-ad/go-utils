@@ -560,7 +560,9 @@ func (l *Logger) openNew() error {
 	if err != nil {
 		return fmt.Errorf("can't open new logfile: %s", err)
 	}
-	go l.Hook(name)
+	if l.Hook != nil {
+		go l.Hook(name)
+	}
 	l.file = f
 	l.size = 0
 	return nil
