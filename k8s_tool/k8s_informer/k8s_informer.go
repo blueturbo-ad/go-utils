@@ -6,7 +6,6 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/blueturbo-ad/go-utils/environment"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
@@ -48,11 +47,12 @@ func (i *Informer) SetUp() error {
 	return nil
 }
 
+// 这里关闭的自动同步是在同步日志配置的时候 由于buff的切换丢失了上一次的file 对象
 func (i *Informer) Run() {
 	// 创建 Informer 工厂
 	namespace := environment.GetSingleton().GetNamespace()
 	loggerex.GetSingleton().Info("system_logger", "namespace: %s", namespace)
-	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, time.Minute*10, informers.WithNamespace(namespace))
+	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, 0, informers.WithNamespace(namespace))
 
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
