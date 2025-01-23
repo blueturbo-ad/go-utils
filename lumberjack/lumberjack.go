@@ -155,7 +155,7 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 	}
 
 	if l.size+writeLen > l.max() {
-		fmt.Printf("size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
+		fmt.Printf("create new file size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
 		if err := l.rotate(); err != nil {
 			return 0, err
 		}
