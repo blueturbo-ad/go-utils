@@ -551,6 +551,7 @@ func (l *Logger) openNew() error {
 		return fmt.Errorf("can't make directories for new logfile: %s", err)
 	}
 	l.file.Close()
+
 	name := l.filename()
 	// Create a new file with a timestamp in the name
 	name = backupName(name, l.LocalTime)
