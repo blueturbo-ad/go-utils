@@ -107,9 +107,10 @@ type Logger struct {
 	// using gzip. The default is not to perform compression.
 	Compress bool `json:"compress" yaml:"compress"`
 
-	size int64
-	file *os.File
-	mu   sync.Mutex
+	size     int64
+	file     *os.File
+	mu       sync.Mutex
+	file_num int
 
 	millCh    chan bool
 	startMill sync.Once
@@ -158,8 +159,19 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 		}
 	}
 
+	if l.file_num >= 1000 {
+		l.file.Close()
+		l.file_num = 0
+		file, err := os.OpenFile(l.Filename, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			return 0, fmt.Errorf("can't open new logfile: %s", err)
+		}
+		l.file = file
+	}
+
 	n, err = l.file.Write(p)
 	l.size += int64(n)
+	l.file_num++
 
 	return n, err
 }
@@ -567,6 +579,7 @@ func (l *Logger) openNew() error {
 	}
 	l.file = f
 	l.size = 0
+	l.file_num = 0
 	return nil
 }
 
