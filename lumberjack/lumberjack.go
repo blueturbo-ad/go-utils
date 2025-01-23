@@ -148,21 +148,24 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 	}
 
 	if l.file == nil {
+		fmt.Println("file 对象是空", l.file)
 		if err = l.openExistingOrNew(len(p)); err != nil {
 			return 0, err
 		}
 	}
 
 	if l.size+writeLen > l.max() {
+		fmt.Printf("size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
 		if err := l.rotate(); err != nil {
 			return 0, err
 		}
 	}
 
 	if l.file_num >= 1000 {
+		file_name := l.file.Name()
+		fmt.Printf("size: %d file_num: %d, name: %s", l.size, l.file_num, file_name)
 		l.file.Close()
 		l.file_num = 0
-		file_name := l.file.Name()
 		file, err := os.OpenFile(file_name, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
 			return 0, fmt.Errorf("can't open new logfile: %s", err)
