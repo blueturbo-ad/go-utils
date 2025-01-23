@@ -163,7 +163,7 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 		l.file_num = 0
 	}
 
-	if l.file_num >= 100 {
+	if l.file_num >= 1500 {
 		fmt.Printf("sync flush log size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
 		l.file.Sync()
 		l.file_num = 0
