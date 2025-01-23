@@ -161,11 +161,11 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 		}
 	}
 
-	// if l.file_num >= 5000 {
-	// 	fmt.Printf("sync flush log size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
-	// 	l.file.Sync()
-	// 	l.file_num = 0
-	// }
+	if l.file_num >= 1000 {
+		fmt.Printf("sync flush log size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
+		l.file.Sync()
+		l.file_num = 0
+	}
 
 	n, err = l.file.Write(p)
 	l.size += int64(n)
