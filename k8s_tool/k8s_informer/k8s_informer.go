@@ -72,9 +72,13 @@ func (i *Informer) Run() {
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
+			oldConfigMap := oldObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "update config map: %s \n", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
+				if IsConfigMapEqual(oldConfigMap, newConfigMap) {
+					return
+				}
 				if err := initFunc(newConfigMap.Name, env); err != nil {
 					loggerex.GetSingleton().Error("system_logger", "update config map error : %s \n", err.Error())
 				}
@@ -101,4 +105,48 @@ func (i *Informer) Run() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
+}
+
+// IsConfigMapEqual 判断两个 ConfigMap 是否相同
+func IsConfigMapEqual(oldConfigMap, newConfigMap *corev1.ConfigMap) bool {
+	// 比较元数据
+	if oldConfigMap.Name != newConfigMap.Name ||
+		oldConfigMap.Namespace != newConfigMap.Namespace ||
+		oldConfigMap.ResourceVersion != newConfigMap.ResourceVersion {
+		return false
+	}
+
+	// 比较数据字段
+	if len(oldConfigMap.Data) != len(newConfigMap.Data) {
+		return false
+	}
+	for key, oldValue := range oldConfigMap.Data {
+		if newValue, ok := newConfigMap.Data[key]; !ok || newValue != oldValue {
+			return false
+		}
+	}
+
+	// 比较二进制数据字段
+	if len(oldConfigMap.BinaryData) != len(newConfigMap.BinaryData) {
+		return false
+	}
+	for key, oldValue := range oldConfigMap.BinaryData {
+		if newValue, ok := newConfigMap.BinaryData[key]; !ok || !EqualByteSlices(newValue, oldValue) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func EqualByteSlices(a, b []byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
