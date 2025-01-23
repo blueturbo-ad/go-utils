@@ -162,7 +162,8 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 	if l.file_num >= 1000 {
 		l.file.Close()
 		l.file_num = 0
-		file, err := os.OpenFile(l.Filename, os.O_APPEND|os.O_WRONLY, 0644)
+		file_name := l.file.Name()
+		file, err := os.OpenFile(file_name, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
 			return 0, fmt.Errorf("can't open new logfile: %s", err)
 		}
