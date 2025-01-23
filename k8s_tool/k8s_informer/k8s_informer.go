@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/blueturbo-ad/go-utils/environment"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
@@ -52,7 +53,7 @@ func (i *Informer) Run() {
 	// 创建 Informer 工厂
 	namespace := environment.GetSingleton().GetNamespace()
 	loggerex.GetSingleton().Info("system_logger", "namespace: %s", namespace)
-	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, 0, informers.WithNamespace(namespace))
+	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, 60*time.Minute, informers.WithNamespace(namespace))
 
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
