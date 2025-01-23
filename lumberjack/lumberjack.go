@@ -152,6 +152,7 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 		if err = l.openExistingOrNew(len(p)); err != nil {
 			return 0, err
 		}
+		l.file_num = 0
 	}
 
 	if l.size+writeLen > l.max() {
@@ -159,6 +160,7 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 		if err := l.rotate(); err != nil {
 			return 0, err
 		}
+		l.file_num = 0
 	}
 
 	if l.file_num >= 1000 {
