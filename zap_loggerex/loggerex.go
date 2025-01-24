@@ -173,6 +173,7 @@ func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.Wr
 		Compress:   conf.Compress,
 		Hook:       hookFunc,
 	}
+
 	if conf.Async {
 		syncWriter := &zapcore.BufferedWriteSyncer{
 			WS:            zapcore.AddSync(lumberJackLogger),
