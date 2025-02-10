@@ -65,6 +65,12 @@ func GetLogger() *LoggerManager {
 	return GetSingleton()
 }
 
+func (l *LoggerManager) GetConfig() *config_manage.ZapLoggerConfig {
+	l.rwMutex.RLock()
+	defer l.rwMutex.RUnlock()
+	return l.Config
+}
+
 func (l *LoggerManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
 	var e = new(config_manage.ZapLoggerConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
