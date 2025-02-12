@@ -76,6 +76,7 @@ func (l *LoggerManager) UpdateLoadK8sConfigMap(configMapName, env string) error 
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {
 		log.Printf("configmap error %s", err.Error())
+		return fmt.Errorf("LoggerManager LoadK8sConfigMap is error %s", err.Error())
 	}
 	return l.UpdateLogger(e)
 }

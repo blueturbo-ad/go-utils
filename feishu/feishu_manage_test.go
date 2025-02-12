@@ -4,9 +4,16 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	"github.com/blueturbo-ad/go-utils/environment"
+	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
 )
 
 func TestFeishuManage(t *testing.T) {
+	os.Setenv("POD_NAME", "test")
+	os.Setenv("POD_NAMESPACE", "dsp-ns")
+	environment.Init()
+	k8sclient.GetSingleton().SetUp()
 	t.Run("TestFeishuerrorManage", func(t *testing.T) {
 		// Test code here
 		var f = GetInstance()
@@ -61,5 +68,9 @@ func TestFeishuManage(t *testing.T) {
 			t.Errorf("os.Getwd() = %v; want nil", err)
 		}
 
+	})
+	t.Run("TestFeishuConfigMap", func(t *testing.T) {
+		logger := GetInstance()
+		logger.UpdateLoadK8sConfigMap("feishu", "Pro")
 	})
 }
