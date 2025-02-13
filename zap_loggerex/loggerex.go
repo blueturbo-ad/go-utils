@@ -139,6 +139,7 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 
 		loger.LoggersMap[value.Name] = &Logger{&LoggerWrapper{zapLogger}, config.Version}
 	}
+	l.Config = config
 	l.next = loger
 	l.current, l.next = l.next, l.current
 
