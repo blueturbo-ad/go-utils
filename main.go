@@ -16,7 +16,12 @@ func main() {
 	environment.Init()
 	k8sclient.GetSingleton().SetUp()
 	var e = redisclient.GetSingleton()
-	err := e.UpdateLoadK8sConfigMap("redis-conf", "Dev")
+	workPath, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	p := workPath + "/config/redis_conf.yaml"
+	err = e.UpdateFromFile(p, "Dev")
 	if err != nil {
 		fmt.Println(err.Error())
 	}

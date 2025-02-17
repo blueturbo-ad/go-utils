@@ -57,7 +57,7 @@ func (l *RedisClientManager) UpdateLoadK8sConfigMap(configMapName, env string) e
 	var e = new(config_manage.RedisConfigManager)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {
-		return fmt.Errorf("FeishuManage  LoadK8sConfigMap is error %s", err.Error())
+		return fmt.Errorf("redis client  LoadK8sConfigMap is error %s", err.Error())
 	}
 	return l.refreshRedisClient(e)
 }

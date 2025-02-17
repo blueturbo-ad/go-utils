@@ -1,0 +1,39 @@
+curused: Dev
+Dev:
+  version: 1
+  redis_conf:
+    - name: event_redis
+      write_pool:
+        database: 0
+        password: ya29.a0AXeO80SzSd6aWD91l5JzlOPIvagLdQiKPK8L5Tz7ImkF-yJAO2ejauiWPUMmKW4J99C_M3aF8A_6ZN8ibaRScpVYi0YzmboCxgsuJwM7yhpaW4r-kd_q8BAk0tGaZCO6TIMQOkYhXu78qkcpSdoiD0yMuLRtnHNFNPaowzmMZrTjZN61aCgYKAd0SARMSFQHGX2Mi98dqHHNdyzP4Vlva_jLeBw0183
+        pool_size: 20
+        timeout: 5000
+        nodes:
+          - 10.152.0.106:6379
+      read_pool:
+        database: 0
+        password: ya29.a0AXeO80SzSd6aWD91l5JzlOPIvagLdQiKPK8L5Tz7ImkF-yJAO2ejauiWPUMmKW4J99C_M3aF8A_6ZN8ibaRScpVYi0YzmboCxgsuJwM7yhpaW4r-kd_q8BAk0tGaZCO6TIMQOkYhXu78qkcpSdoiD0yMuLRtnHNFNPaowzmMZrTjZN61aCgYKAd0SARMSFQHGX2Mi98dqHHNdyzP4Vlva_jLeBw0183
+        pool_size: 20
+        timeout: 5000
+        nodes:
+          - 10.152.0.106:6379
+Pro:
+  version: 1
+  redis_conf:
+    - name: event_redis
+      write_pool:
+        database: 0
+        password: ya29.a0AXeO80SzSd6aWD91l5JzlOPIvagLdQiKPK8L5Tz7ImkF-yJAO2ejauiWPUMmKW4J99C_M3aF8A_6ZN8ibaRScpVYi0YzmboCxgsuJwM7yhpaW4r-kd_q8BAk0tGaZCO6TIMQOkYhXu78qkcpSdoiD0yMuLRtnHNFNPaowzmMZrTjZN61aCgYKAd0SARMSFQHGX2Mi98dqHHNdyzP4Vlva_jLeBw0183
+        pool_size: 20
+        timeout: 5000
+        nodes:
+          - 10.152.0.106:6379
+      read_pool:
+        database: 0
+        password: ya29.a0AXeO80SzSd6aWD91l5JzlOPIvagLdQiKPK8L5Tz7ImkF-yJAO2ejauiWPUMmKW4J99C_M3aF8A_6ZN8ibaRScpVYi0YzmboCxgsuJwM7yhpaW4r-kd_q8BAk0tGaZCO6TIMQOkYhXu78qkcpSdoiD0yMuLRtnHNFNPaowzmMZrTjZN61aCgYKAd0SARMSFQHGX2Mi98dqHHNdyzP4Vlva_jLeBw0183
+        pool_size: 20
+        timeout: 5000
+        nodes:
+          - 10.152.0.106:6379
+Pre: 
+Test: 
