@@ -115,11 +115,6 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 		PoolSize:        conf.WritePool.PoolSize,
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
-		NewClient: func(opt *redis.Options) *redis.Client {
-			opt.DB = conf.WritePool.Database
-			opt.Password = conf.ReadPool.Password
-			return redis.NewClient(opt)
-		},
 	})
 }
 
@@ -132,10 +127,5 @@ func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisC
 		PoolSize:        conf.ReadPool.PoolSize,
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
-		NewClient: func(opt *redis.Options) *redis.Client {
-			opt.DB = conf.ReadPool.Database
-			opt.Password = conf.ReadPool.Password
-			return redis.NewClient(opt)
-		},
 	})
 }
