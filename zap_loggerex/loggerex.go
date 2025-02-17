@@ -71,6 +71,12 @@ func (l *LoggerManager) GetConfig() *config_manage.ZapLoggerConfig {
 	return l.Config
 }
 
+func (l *LoggerManager) GetCurConfig() *LoggerEx {
+	l.rwMutex.RLock()
+	defer l.rwMutex.RUnlock()
+	return l.current
+}
+
 func (l *LoggerManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
 	var e = new(config_manage.ZapLoggerConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
@@ -133,6 +139,7 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 
 		loger.LoggersMap[value.Name] = &Logger{&LoggerWrapper{zapLogger}, config.Version}
 	}
+	l.Config = config
 	l.next = loger
 	l.current, l.next = l.next, l.current
 
