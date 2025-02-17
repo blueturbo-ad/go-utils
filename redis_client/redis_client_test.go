@@ -1,6 +1,8 @@
 package redisclient
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -19,5 +21,22 @@ func TestRedisClientTest(t *testing.T) {
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
 		}
+	})
+	t.Run("TestRedisGetReadClient", func(t *testing.T) {
+		var e = GetSingleton()
+		err := e.UpdateLoadK8sConfigMap("redis-conf", "Dev")
+		if err != nil {
+			t.Errorf("os.Getwd() = %v; want nil", err)
+		}
+		client := e.GetReadClient("event_redis")
+		if client == nil {
+			t.Errorf("os.Getwd() = %v; want nil", client)
+		}
+		ctx := context.Background()
+		res, err := client.Get(ctx, "test").Result()
+		if err != nil {
+			t.Errorf("os.Getwd() = %v; want nil", err)
+		}
+		fmt.Println(res)
 	})
 }

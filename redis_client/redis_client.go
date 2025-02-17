@@ -35,16 +35,16 @@ func GetSingleton() *RedisClientManager {
 	return instance
 }
 
-func (r *RedisClientManager) GetReadClient() interface{} {
+func (r *RedisClientManager) GetReadClient(name string) *redis.ClusterClient {
 	r.rwMutex.RLock()
 	defer r.rwMutex.RUnlock()
-	return r.ReadClient[0]
+	return r.ReadClient[0][name]
 }
 
-func (r *RedisClientManager) GetWriteClient() interface{} {
+func (r *RedisClientManager) GetWriteClient(name string) *redis.ClusterClient {
 	r.rwMutex.RLock()
 	defer r.rwMutex.RUnlock()
-	return r.WriteClient[0]
+	return r.WriteClient[0][name]
 }
 
 func (l *RedisClientManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
