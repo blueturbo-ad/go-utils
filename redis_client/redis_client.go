@@ -38,7 +38,7 @@ func GetSingleton() *RedisClientManager {
 func (r *RedisClientManager) GetReadClient(name string) *redis.ClusterClient {
 	r.rwMutex.RLock()
 	defer r.rwMutex.RUnlock()
-	if r.ReadClient[r.index][name] == nil {
+	if r.ReadClient[r.index][name] != nil {
 		return r.ReadClient[r.index][name]
 	}
 	return nil
@@ -47,7 +47,7 @@ func (r *RedisClientManager) GetReadClient(name string) *redis.ClusterClient {
 func (r *RedisClientManager) GetWriteClient(name string) *redis.ClusterClient {
 	r.rwMutex.RLock()
 	defer r.rwMutex.RUnlock()
-	if r.WriteClient[r.index][name] == nil {
+	if r.WriteClient[r.index][name] != nil {
 		return r.WriteClient[r.index][name]
 	}
 	return nil
