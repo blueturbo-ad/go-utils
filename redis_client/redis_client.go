@@ -38,13 +38,19 @@ func GetSingleton() *RedisClientManager {
 func (r *RedisClientManager) GetReadClient(name string) *redis.ClusterClient {
 	r.rwMutex.RLock()
 	defer r.rwMutex.RUnlock()
-	return r.ReadClient[0][name]
+	if r.ReadClient[r.index][name] == nil {
+		return r.ReadClient[r.index][name]
+	}
+	return nil
 }
 
 func (r *RedisClientManager) GetWriteClient(name string) *redis.ClusterClient {
 	r.rwMutex.RLock()
 	defer r.rwMutex.RUnlock()
-	return r.WriteClient[0][name]
+	if r.WriteClient[r.index][name] == nil {
+		return r.WriteClient[r.index][name]
+	}
+	return nil
 }
 
 func (l *RedisClientManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
@@ -96,7 +102,7 @@ func (r *RedisClientManager) refreshRedisClient(confs *redisconfigmanger.RedisCo
 		r.ReadClient[newIndex][v.Name] = r.BuildReadRedisClient(&v)
 		r.WriteClient[newIndex][v.Name] = r.BuildWriteRedisClient(&v)
 	}
-
+	r.index = newIndex
 	return nil
 }
 
