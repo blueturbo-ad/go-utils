@@ -3,31 +3,53 @@ package config_manage
 import (
 	"fmt"
 
+	"github.com/blueturbo-ad/go-utils/environment"
 	"gopkg.in/yaml.v3"
 )
 
-type WritePoolConfig struct {
-	DataBase int      `yaml:"database"`
-	TimeOut  int      `yaml:"timeout"`
-	PoolSize int      `yaml:"poolsize"`
-	Nodes    []string `yaml:"nodes"`
-}
-
-type ReadPoolConfig struct {
-	DataBase int      `yaml:"database"`
-	TimeOut  int      `yaml:"timeout"`
-	PoolSize int      `yaml:"poolsize"`
-	Nodes    []string `yaml:"nodes"`
-}
-
 type RedisConfig struct {
-	Name      string          `yaml:"name"`
-	WritePool WritePoolConfig `yaml:"writepool"`
-	ReadPool  ReadPoolConfig  `yaml:"readpool"`
+	Name      string `yaml:"name"`
+	WritePool struct {
+		Database int      `yaml:"database"`
+		PoolSize int      `yaml:"pool_size"`
+		Password string   `yaml:"password"`
+		Timeout  int      `yaml:"timeout"`
+		Nodes    []string `yaml:"nodes"`
+	} `yaml:"write_pool"`
+	ReadPool struct {
+		Database int      `yaml:"database"`
+		PoolSize int      `yaml:"pool_size"`
+		Password string   `yaml:"password"`
+		Timeout  int      `yaml:"timeout"`
+		Nodes    []string `yaml:"nodes"`
+	} `yaml:"read_pool"`
 }
 
 type RedisConfigManager struct {
-	Config *RedisConfig `yaml:"redis"`
+	Config  *[]RedisConfig `yaml:"redis_conf"`
+	Version string         `yaml:"version"`
+}
+
+func (r *RedisConfigManager) LoadK8sConfigMap(configMapName, env string) error {
+	var c = new(ManagerConfig)
+	namespace := environment.GetSingleton().GetNamespace()
+	info, err := c.LoadK8sConfigMap(namespace, configMapName, env)
+	if err != nil {
+		return err
+	}
+	if (*info) == nil {
+		return fmt.Errorf("info is nil，")
+	}
+	inmap := (*info).(map[string]interface{})
+	data, err := yaml.Marshal(inmap)
+	if err != nil {
+		return fmt.Errorf("failed to marshal inmap: %v", err)
+	}
+	err = yaml.Unmarshal(data, &r)
+	if err != nil {
+		return fmt.Errorf(ErroryamlNotfound, err)
+	}
+	return nil
 }
 
 func (r *RedisConfigManager) LoadConfig(filePath string, env string) error {
