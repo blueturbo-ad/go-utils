@@ -172,8 +172,8 @@ func (r *RedisClientManager) retrieveTokenFunc() (string, string, error) {
 		return EmptyString, EmptyString, err
 	}
 	var token string
-	if result["access_token"] != nil {
-		if val, ok := result["access_token"].(string); ok {
+	if result["event_redis"] != nil {
+		if val, ok := result["event_redis"].(string); ok {
 			token = val
 		}
 	}
