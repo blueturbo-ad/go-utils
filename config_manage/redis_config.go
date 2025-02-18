@@ -19,7 +19,6 @@ type RedisConfig struct {
 	ReadPool struct {
 		Database int      `yaml:"database"`
 		PoolSize int      `yaml:"pool_size"`
-		Password string   `yaml:"password"`
 		Timeout  int      `yaml:"timeout"`
 		Nodes    []string `yaml:"nodes"`
 	} `yaml:"read_pool"`

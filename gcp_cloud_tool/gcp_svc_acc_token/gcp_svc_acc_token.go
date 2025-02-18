@@ -91,7 +91,8 @@ func (g *GcpSvcAccountToken) retrieveToken(confs []config_manage.CloudAcc) error
 		}
 		client := credentials.NewIAMCredentialsClient(conn)
 
-		svcAccount := flag.String("a", "projects/-/serviceAccounts/blueturbo-dsp-deploy@blueturbo.iam.gserviceaccount.com", v.AccountEmail)
+		apiKey := fmt.Sprintf("projects/-/serviceAccounts/%s", v.AccountEmail)
+		svcAccount := flag.String("a", apiKey, v.AccountEmail)
 		req := credentials.GenerateAccessTokenRequest{
 			Name:     *svcAccount,
 			Scope:    []string{"https://www.googleapis.com/auth/cloud-platform"},

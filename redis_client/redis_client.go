@@ -1,12 +1,16 @@
 package redisclient
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"sync"
 	"time"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
 	redisconfigmanger "github.com/blueturbo-ad/go-utils/config_manage"
+	gcpcloudstorage "github.com/blueturbo-ad/go-utils/gcp_cloud_tool/gcp_cloud_storage"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -108,12 +112,18 @@ func (r *RedisClientManager) refreshRedisClient(confs *redisconfigmanger.RedisCo
 
 func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
 	return redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:           []string{conf.WritePool.Nodes[0]},
-		Username:        "default",
-		Password:        conf.WritePool.Password,
-		ReadTimeout:     time.Duration(conf.WritePool.Timeout) * time.Millisecond,
-		WriteTimeout:    time.Duration(conf.WritePool.Timeout) * time.Millisecond,
-		PoolSize:        conf.WritePool.PoolSize,
+		Addrs:        []string{conf.WritePool.Nodes[0]},
+		ReadTimeout:  time.Duration(conf.WritePool.Timeout) * time.Millisecond,
+		WriteTimeout: time.Duration(conf.WritePool.Timeout) * time.Millisecond,
+		PoolSize:     conf.WritePool.PoolSize,
+		CredentialsProvider: func() (string, string) {
+			username, passoword, err := r.retrieveTokenFunc()
+			if err != nil {
+				fmt.Println("retrieveTokenFunc error:", err.Error())
+				return EmptyString, EmptyString
+			}
+			return username, passoword
+		},
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
 	})
@@ -121,13 +131,53 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 
 func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
 	return redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:           []string{conf.ReadPool.Nodes[0]},
-		Username:        "default",
-		Password:        conf.ReadPool.Password,
-		ReadTimeout:     time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
-		WriteTimeout:    time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
-		PoolSize:        conf.ReadPool.PoolSize,
+		Addrs:        []string{conf.ReadPool.Nodes[0]},
+		ReadTimeout:  time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
+		WriteTimeout: time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
+		PoolSize:     conf.ReadPool.PoolSize,
+		CredentialsProvider: func() (string, string) {
+			username, passoword, err := r.retrieveTokenFunc()
+			if err != nil {
+				fmt.Println("retrieveTokenFunc error:", err.Error())
+				return EmptyString, EmptyString
+			}
+			return username, passoword
+		},
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
 	})
+}
+
+func (r *RedisClientManager) retrieveTokenFunc() (string, string, error) {
+	ctx := context.Background()
+	client := gcpcloudstorage.GetSingleton().GetClient("dsp_bucket")
+	if client == nil {
+		return EmptyString, EmptyString, fmt.Errorf("cloud storage client is nil")
+	}
+	wc, err := client.Object("account_token/access_token.json").NewReader(ctx)
+	if err != nil {
+		return EmptyString, EmptyString, err
+	}
+	defer wc.Close()
+	// 读取对象内容
+	data, err := io.ReadAll(wc)
+	if err != nil {
+		return EmptyString, EmptyString, err
+	}
+
+	// 反序列化为 map
+	var result map[string]interface{}
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return EmptyString, EmptyString, err
+	}
+	var token string
+	if result["access_token"] != nil {
+		if val, ok := result["access_token"].(string); ok {
+			token = val
+		}
+	}
+	username := "default"
+	password := token
+	return username, password, nil
 }
