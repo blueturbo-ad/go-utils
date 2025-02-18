@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/blueturbo-ad/go-utils/environment"
@@ -13,8 +14,10 @@ func main() {
 	os.Setenv("POD_NAMESPACE", "dsp-ns")
 	environment.Init()
 	k8sclient.GetSingleton().SetUp()
-	gcpcloudstorage.GetSingleton().UpdateLoadK8sConfigMap("gcp-cloud-storage-config", "Dev")
-
+	err := gcpcloudstorage.GetSingleton().UpdateLoadK8sConfigMap("gcp-cloud-storage-config", "Dev")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	// var e = redisclient.GetSingleton()
 	// workPath, err := os.Getwd()
 	// if err != nil {
