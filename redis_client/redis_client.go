@@ -164,7 +164,7 @@ func (r *RedisClientManager) retrieveTokenFunc() (string, string, error) {
 	if err != nil {
 		return EmptyString, EmptyString, err
 	}
-
+	fmt.Println(string(data))
 	// 反序列化为 map
 	var result map[string]interface{}
 	err = json.Unmarshal(data, &result)
