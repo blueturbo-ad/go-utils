@@ -111,41 +111,49 @@ func (r *RedisClientManager) refreshRedisClient(confs *redisconfigmanger.RedisCo
 }
 
 func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
-	username, password, _ := r.retrieveTokenFunc(conf)
+	// username, password, _ := r.retrieveTokenFunc(conf)
 	return redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:        []string{conf.WritePool.Nodes[0]},
 		ReadTimeout:  time.Duration(conf.WritePool.Timeout) * time.Millisecond,
 		WriteTimeout: time.Duration(conf.WritePool.Timeout) * time.Millisecond,
 		PoolSize:     conf.WritePool.PoolSize,
-		Username:     username,
-		Password:     password,
-		CredentialsProvider: func() (string, string) {
-			username, passoword, err := r.retrieveTokenFunc(conf)
-			if err != nil {
-				fmt.Println("retrieveTokenFunc error:", err.Error())
-				return EmptyString, EmptyString
-			}
-			return username, passoword
-		},
+		// Username:     username,
+		// Password:     password,
+		// CredentialsProvider: func() (string, string) {
+		// 	username, passoword, err := r.retrieveTokenFunc(conf)
+		// 	if err != nil {
+		// 		fmt.Println("retrieveTokenFunc error:", err.Error())
+		// 		return EmptyString, EmptyString
+		// 	}
+		// 	return username, passoword
+		// },
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
+		NewClient: func(opt *redis.Options) *redis.Client {
+			opt.Username, opt.Password, _ = r.retrieveTokenFunc(conf)
+			return redis.NewClient(opt)
+		},
 	})
 }
 
 func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
-	username, password, _ := r.retrieveTokenFunc(conf)
+	// username, password, _ := r.retrieveTokenFunc(conf)
 	return redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:        []string{conf.ReadPool.Nodes[0]},
 		ReadTimeout:  time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		WriteTimeout: time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		PoolSize:     conf.ReadPool.PoolSize,
-		Username:     username,
-		Password:     password,
-		CredentialsProviderContext: func(ctx context.Context) (username string, password string, err error) {
-			return r.retrieveTokenFunc(conf)
-		},
+		// Username:     username,
+		// Password:     password,
+		// CredentialsProviderContext: func(ctx context.Context) (username string, password string, err error) {
+		// 	return r.retrieveTokenFunc(conf)
+		// },
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
+		NewClient: func(opt *redis.Options) *redis.Client {
+			opt.Username, opt.Password, _ = r.retrieveTokenFunc(conf)
+			return redis.NewClient(opt)
+		},
 	})
 }
 
