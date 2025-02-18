@@ -87,7 +87,6 @@ func (c *ManagerConfig) GetEnvironmentConfig(env string) (*any, error) {
 	if env == "" {
 		env = c.CurUsed
 	}
-	fmt.Printf("env = %s data = %v\n", env, c)
 	switch env {
 	case "Dev":
 		return &c.Dev, nil
