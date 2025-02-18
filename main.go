@@ -20,12 +20,12 @@ func main() {
 	cs := workPath + "/config/cloud_storage.yaml"
 	err = gcpcloudstorage.GetSingleton().UpdateFromFile(cs, "Dev")
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("gcp cloud storage", err.Error())
 	}
 	ac := workPath + "/config/gcp_acc_token_conf.yaml"
 	err = gcpcloudtool.GetSingleton().UpdateFromFile(ac, "Dev")
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("gcp access token", err.Error())
 	}
 	// var e = redisclient.GetSingleton()
 
