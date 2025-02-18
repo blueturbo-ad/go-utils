@@ -112,7 +112,11 @@ func (g *GcpSvcAccountToken) retrieveToken(confs []config_manage.CloudAcc) error
 		return err
 	}
 	ctx := context.Background()
-	wc := gcpcloudstorage.GetSingleton().GetClient("gcp-cloud-storage-config").Object("accoss_token.json").NewWriter(ctx)
+	client := gcpcloudstorage.GetSingleton().GetClient("gcp-cloud-storage-config")
+	if client == nil {
+		return fmt.Errorf("failed to get GCP cloud storage client")
+	}
+	wc := client.Object("accoss_token.json").NewWriter(ctx)
 	if _, err := wc.Write(t); err != nil {
 		return err
 	}
