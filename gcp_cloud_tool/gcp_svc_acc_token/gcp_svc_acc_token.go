@@ -120,6 +120,11 @@ func (g *GcpSvcAccountToken) retrieveToken(confs []config_manage.CloudAcc) error
 	if _, err := wc.Write(t); err != nil {
 		return err
 	}
+	if err := wc.Close(); err != nil { // 检查 wc.Close() 的返回值
+		fmt.Printf("Error closing writer: %+v\n", err)
+		return err
+	}
+
 	return nil
 }
 
