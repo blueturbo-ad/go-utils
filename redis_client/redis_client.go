@@ -136,13 +136,8 @@ func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisC
 		ReadTimeout:  time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		WriteTimeout: time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		PoolSize:     conf.ReadPool.PoolSize,
-		CredentialsProvider: func() (string, string) {
-			username, passoword, err := r.retrieveTokenFunc(conf)
-			if err != nil {
-				fmt.Println("retrieveTokenFunc error:", err.Error())
-				return EmptyString, EmptyString
-			}
-			return username, passoword
+		CredentialsProviderContext: func(ctx context.Context) (username string, password string, err error) {
+			return r.retrieveTokenFunc(conf)
 		},
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
