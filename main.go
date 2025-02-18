@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/blueturbo-ad/go-utils/environment"
@@ -41,9 +42,9 @@ func main() {
 		fmt.Println("redis get client", err.Error())
 	}
 	ctx := context.Background()
-	res, err := client.Get(ctx, "test").Result()
+	pong, err := client.Ping(ctx).Result()
 	if err != nil {
-		fmt.Println("redis get", err.Error())
+		log.Fatalf("Error connecting to Redis: %v", err)
 	}
-	fmt.Println(res)
+	fmt.Println(pong)
 }
