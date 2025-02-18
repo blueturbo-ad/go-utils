@@ -180,12 +180,11 @@ func (e *Environment) initEnvironment() {
 	e.initMacAddresses()
 	e.initPodName()
 	e.initNameSpace()
-	podInfoByte, err := json.Marshal(e.podInfo)
+	_, err := json.Marshal(e.podInfo)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("env: %s, region: %s, workPath: %s, confPath: %s workName: %s, instanceIp: %s, macAddresses: %s, podInfo: %s uniqueId: %s\n", e.env, e.region, e.workPath, e.confPath, e.workName, e.instanceIp, strings.Join(e.macAddresses, ","), string(podInfoByte), e.uniqueId)
 	if e.env == KeyPre { // 如果为pre环境则输出一下pre version的信息
 		fmt.Printf("[INFO] env=[%s] and pre version=[%s]", e.env, e.preVersion)
 	}
