@@ -38,12 +38,12 @@ func main() {
 	}
 	client := e.GetReadClient("event_redis")
 	if client == nil {
-		fmt.Println(err.Error())
+		fmt.Println("redis get client", err.Error())
 	}
 	ctx := context.Background()
 	res, err := client.Get(ctx, "test").Result()
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("redis get", err.Error())
 	}
 	fmt.Println(res)
 }
