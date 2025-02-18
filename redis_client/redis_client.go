@@ -117,7 +117,7 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 		WriteTimeout: time.Duration(conf.WritePool.Timeout) * time.Millisecond,
 		PoolSize:     conf.WritePool.PoolSize,
 		CredentialsProvider: func() (string, string) {
-			username, passoword, err := r.retrieveTokenFunc()
+			username, passoword, err := r.retrieveTokenFunc(conf)
 			if err != nil {
 				fmt.Println("retrieveTokenFunc error:", err.Error())
 				return EmptyString, EmptyString
@@ -130,13 +130,14 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 }
 
 func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
+
 	return redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:        []string{conf.ReadPool.Nodes[0]},
 		ReadTimeout:  time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		WriteTimeout: time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		PoolSize:     conf.ReadPool.PoolSize,
 		CredentialsProvider: func() (string, string) {
-			username, passoword, err := r.retrieveTokenFunc()
+			username, passoword, err := r.retrieveTokenFunc(conf)
 			if err != nil {
 				fmt.Println("retrieveTokenFunc error:", err.Error())
 				return EmptyString, EmptyString
@@ -148,7 +149,7 @@ func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisC
 	})
 }
 
-func (r *RedisClientManager) retrieveTokenFunc() (string, string, error) {
+func (r *RedisClientManager) retrieveTokenFunc(conf *redisconfigmanger.RedisConfig) (string, string, error) {
 	ctx := context.Background()
 	client := gcpcloudstorage.GetSingleton().GetClient("dsp_bucket")
 	if client == nil {
@@ -172,8 +173,8 @@ func (r *RedisClientManager) retrieveTokenFunc() (string, string, error) {
 		return EmptyString, EmptyString, err
 	}
 	var token string
-	if result["event_redis"] != nil {
-		if val, ok := result["event_redis"].(string); ok {
+	if result[conf.Name] != nil {
+		if val, ok := result[conf.Name].(string); ok {
 			token = val
 		}
 	}
