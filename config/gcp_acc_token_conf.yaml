@@ -1,0 +1,13 @@
+curused: Dev
+Dev:
+  version: 1
+  cloud_acc:
+    - name: event_redis
+      account_email: blueturbo-dsp-deploy@blueturbo.iam.gserviceaccount.com
+Pro:
+  version: 1
+  cloud_acc:
+    - name: event_redis
+      account_email: blueturbo-dsp-deploy@blueturbo.iam.gserviceaccount.com
+Pre: 
+Test: 

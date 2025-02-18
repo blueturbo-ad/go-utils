@@ -1,0 +1,15 @@
+curused: Dev
+Dev:
+  version: 1
+  cloud_acc:
+    - name: dsp_bucket
+      project: blueturbo
+      bucket: blueturbo_dsp_logs_sg/account_token
+Pro:
+  version: 1
+  cloud_acc:
+    - name: event_redis
+      project: blueturbo
+      bucket: blueturbo_dsp_logs_sg/account_token
+Pre: 
+Test: 
