@@ -40,7 +40,7 @@ func (g *GcpCloudStorageTokenConfig) LoadK8sConfigMap(configMapName, env string)
 	return nil
 }
 
-func (r *GcpCloudStorageTokenConfig) LoadConfig(filePath string, env string) error {
+func (g *GcpCloudStorageTokenConfig) LoadConfig(filePath string, env string) error {
 	var c = new(ManagerConfig)
 	info, err := c.LoadFileConfig(filePath, env)
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *GcpCloudStorageTokenConfig) LoadConfig(filePath string, env string) err
 	if err != nil {
 		return fmt.Errorf("failed to marshal inmap: %v", err)
 	}
-	err = yaml.Unmarshal(data, &r)
+	err = yaml.Unmarshal(data, &g)
 	if err != nil {
 		return fmt.Errorf(ErroryamlNotfound, err)
 	}
