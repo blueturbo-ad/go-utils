@@ -112,7 +112,7 @@ func (g *GcpSvcAccountToken) retrieveToken(confs []config_manage.CloudAcc) error
 		return err
 	}
 	ctx := context.Background()
-	client := gcpcloudstorage.GetSingleton().GetClient("gcp-cloud-storage-config")
+	client := gcpcloudstorage.GetSingleton().GetClient("dsp_bucket")
 	if client == nil {
 		return fmt.Errorf("failed to get GCP cloud storage client")
 	}

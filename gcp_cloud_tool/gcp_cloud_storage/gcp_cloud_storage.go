@@ -84,7 +84,7 @@ func (g *GcpCloudStorage) BucketClient(confs []config_manage.CloudStorage) error
 		if g.Clients == nil {
 			g.Clients = make(map[string]*storage.BucketHandle)
 		}
-		g.Clients[conf.Bucket] = bucket
+		g.Clients[conf.Name] = bucket
 	}
 
 	return nil
