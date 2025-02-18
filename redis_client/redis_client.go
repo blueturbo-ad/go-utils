@@ -179,5 +179,6 @@ func (r *RedisClientManager) retrieveTokenFunc() (string, string, error) {
 	}
 	username := "default"
 	password := token
+	fmt.Println("username:", username, "password:", password)
 	return username, password, nil
 }
