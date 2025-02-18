@@ -116,7 +116,7 @@ func (g *GcpSvcAccountToken) retrieveToken(confs []config_manage.CloudAcc) error
 	if client == nil {
 		return fmt.Errorf("failed to get GCP cloud storage client")
 	}
-	wc := client.Object("access_token.json").NewWriter(ctx)
+	wc := client.Object("account_token/access_token.json").NewWriter(ctx)
 	if _, err := wc.Write(t); err != nil {
 		return err
 	}
