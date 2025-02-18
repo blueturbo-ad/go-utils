@@ -4,12 +4,12 @@ Dev:
   gcp_attr:
     - name: dsp_bucket
       project: blueturbo
-      bucket: blueturbo_dsp_logs_sg/account_token
+      bucket: blueturbo_dsp_logs_sg
 Pro:
   version: 1
   gcp_attr:
     - name: dsp_bucket
       project: blueturbo
-      bucket: blueturbo_dsp_logs_sg/account_token
+      bucket: blueturbo_dsp_logs_sg
 Pre: 
 Test: 
