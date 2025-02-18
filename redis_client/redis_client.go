@@ -109,6 +109,7 @@ func (r *RedisClientManager) refreshRedisClient(confs *redisconfigmanger.RedisCo
 func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
 	return redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:           []string{conf.WritePool.Nodes[0]},
+		Username:        "default",
 		Password:        conf.WritePool.Password,
 		ReadTimeout:     time.Duration(conf.WritePool.Timeout) * time.Millisecond,
 		WriteTimeout:    time.Duration(conf.WritePool.Timeout) * time.Millisecond,
@@ -121,6 +122,7 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
 	return redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:           []string{conf.ReadPool.Nodes[0]},
+		Username:        "default",
 		Password:        conf.ReadPool.Password,
 		ReadTimeout:     time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		WriteTimeout:    time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
