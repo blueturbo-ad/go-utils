@@ -111,11 +111,14 @@ func (r *RedisClientManager) refreshRedisClient(confs *redisconfigmanger.RedisCo
 }
 
 func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
+	username, password, _ := r.retrieveTokenFunc(conf)
 	return redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:        []string{conf.WritePool.Nodes[0]},
 		ReadTimeout:  time.Duration(conf.WritePool.Timeout) * time.Millisecond,
 		WriteTimeout: time.Duration(conf.WritePool.Timeout) * time.Millisecond,
 		PoolSize:     conf.WritePool.PoolSize,
+		Username:     username,
+		Password:     password,
 		CredentialsProvider: func() (string, string) {
 			username, passoword, err := r.retrieveTokenFunc(conf)
 			if err != nil {
@@ -130,12 +133,14 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 }
 
 func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
-
+	username, password, _ := r.retrieveTokenFunc(conf)
 	return redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs:        []string{conf.ReadPool.Nodes[0]},
 		ReadTimeout:  time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		WriteTimeout: time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
 		PoolSize:     conf.ReadPool.PoolSize,
+		Username:     username,
+		Password:     password,
 		CredentialsProviderContext: func(ctx context.Context) (username string, password string, err error) {
 			return r.retrieveTokenFunc(conf)
 		},
