@@ -52,7 +52,6 @@ func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (
 	fmt.Printf("base data: %s", conf)
 	err = yaml.Unmarshal([]byte(conf), &c)
 	if err != nil {
-		fmt.Println("base error ", err.Error())
 		return nil, fmt.Errorf(ErroryamlNotfound, err)
 	}
 	return c.GetEnvironmentConfig(env)

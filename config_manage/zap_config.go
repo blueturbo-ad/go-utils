@@ -77,8 +77,6 @@ func (l *ZapLoggerConfig) LoadMemoryZapConfig(buf []byte, env string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(info)
-	// 解析 YAML 数据
 	inmap := (*info).(map[string]interface{})
 	data, err := yaml.Marshal(inmap)
 	if err != nil {
