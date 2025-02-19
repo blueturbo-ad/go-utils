@@ -1,0 +1,21 @@
+curused: "Dev"
+Dev:
+  version: 1
+  http_conf:
+    - name: "s2s"
+      timeout: 5000
+      keep_alive: 60
+      max_idle_conns: 10
+      max_idle_conns_per_host: 10
+      idle_conn_timeout: 90
+Pro:
+  version: 1
+  http_conf:
+    - name: "s2s"
+      timeout: 5000
+      keep_alive: 60
+      max_idle_conns: 10
+      max_idle_conns_per_host: 10
+      idle_conn_timeout: 90
+Pre:
+Test:
