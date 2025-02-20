@@ -17,7 +17,8 @@ import (
 )
 
 var (
-	instance    *GcpSvcAccountToken
+	instance *GcpSvcAccountToken
+
 	once        sync.Once
 	EmptyString = ""
 )
