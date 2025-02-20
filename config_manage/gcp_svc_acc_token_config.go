@@ -8,8 +8,8 @@ import (
 )
 
 type CloudAcc struct {
-	Name         string `yaml:"name"`
-	AccountEmail string `yaml:"account_email"`
+	Name              string `yaml:"name"`
+	AccountPremession string `yaml:"account_pre"`
 }
 
 type GcpSvcAccountTokenConfig struct {
