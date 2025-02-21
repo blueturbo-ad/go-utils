@@ -1,0 +1,45 @@
+curused: Dev
+Dev:
+  version: 1
+  kafka_conf:
+    - name: event_kafka
+      producer:
+        broker: bootstrap.kafka-cluster.asia-east1.managedkafka.fine-acronym-336109.cloud.goog:9092
+        topic: event_topic
+        producer: "event_producer"
+        username: imagen-srvact@fine-acronym-336109.iam.gserviceaccount.com
+        password: /home/imagen-srvact/imagen-srvact.json
+        protocol: SASL_SSL
+        mechanism: PLAIN
+      customer:
+        broker: bootstrap.kafka-cluster.asia-east1.managedkafka.fine-acronym-336109.cloud.goog:9092
+        topic: event_topic
+        group: event_group
+        username: imagen-srvact@fine-acronym-336109.iam.gserviceaccount.com
+        password: /home/imagen-srvact/imagen-srvact.json
+        protocol: SASL_SSL
+        mechanism: PLAIN
+        reset: earliest
+Pro:
+  version: 1
+  kafka_conf:
+    - name: event_kafka
+      producer:
+        broker: bootstrap.kafka-cluster.asia-east1.managedkafka.fine-acronym-336109.cloud.goog:9092
+        topic: event_topic
+        producer: "event_producer"
+        username: imagen-srvact@fine-acronym-336109.iam.gserviceaccount.com
+        password: /home/imagen-srvact/imagen-srvact.json
+        protocol: SASL_SSL
+        mechanism: PLAIN
+      customer:
+        broker: bootstrap.kafka-cluster.asia-east1.managedkafka.fine-acronym-336109.cloud.goog:9092
+        topic: event_topic
+        group: event_group
+        username: imagen-srvact@fine-acronym-336109.iam.gserviceaccount.com
+        password: /home/imagen-srvact/imagen-srvact.json
+        protocol: SASL_SSL
+        mechanism: PLAIN
+        reset: earliest
+Pre: {}
+Test: {}
