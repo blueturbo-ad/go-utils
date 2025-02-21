@@ -59,7 +59,6 @@ type KafkaConfig struct {
 	Name     string `yaml:"name"`
 	Producer struct {
 		Broker    string `yaml:"broker"`
-		Topic     string `yaml:"topic"`
 		Producer  string `yaml:"producer"`
 		Username  string `yaml:"username"`
 		Password  string `yaml:"password"`
@@ -68,7 +67,6 @@ type KafkaConfig struct {
 	} `yaml:"producer"`
 	Customer struct {
 		Broker    string `yaml:"broker"`
-		Topic     string `yaml:"topic"`
 		Group     string `yaml:"group"`
 		Username  string `yaml:"username"`
 		Password  string `yaml:"password"`
