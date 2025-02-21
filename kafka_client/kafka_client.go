@@ -1,4 +1,4 @@
-package kafkatool
+package kafkaclient
 
 import (
 	"fmt"
