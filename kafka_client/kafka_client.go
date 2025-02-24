@@ -38,8 +38,6 @@ func NewKafkaClientManager() *KafkaClientManager {
 }
 
 func (k *KafkaClientManager) GetProducerClient(name string) *kafka.Producer {
-	k.rwMutex.RLock()
-	defer k.rwMutex.RUnlock()
 	if k.ProducerClient[k.index][name] != nil {
 		return k.ProducerClient[k.index][name]
 	}
@@ -47,8 +45,6 @@ func (k *KafkaClientManager) GetProducerClient(name string) *kafka.Producer {
 }
 
 func (k *KafkaClientManager) GetConsumerClient(name string) *kafka.Consumer {
-	k.rwMutex.RLock()
-	defer k.rwMutex.RUnlock()
 	if k.ConsumerClient[k.index][name] != nil {
 		return k.ConsumerClient[k.index][name]
 	}
@@ -106,6 +102,7 @@ func (k *KafkaClientManager) buildKafkaClient(e *config_manage.KafkaConfigManage
 			return err
 		}
 		k.rwMutex.Lock()
+		defer k.rwMutex.Unlock()
 		k.index = (k.index + 1) % 2
 		if k.ProducerClient[k.index] == nil {
 			k.ProducerClient[k.index] = make(map[string]*kafka.Producer)
