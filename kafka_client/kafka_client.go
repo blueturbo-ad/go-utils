@@ -123,7 +123,7 @@ func (k *KafkaClientManager) buildKafkaClient(e *config_manage.KafkaConfigManage
 	return nil
 }
 
-func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*kafka.Producer, error) {
+func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*kafka.Writer, error) {
 	// 创建生产者配置
 	mechanism := plain.Mechanism{
 		Username: conf.Producer.Username,
@@ -153,7 +153,7 @@ func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*ka
 
 }
 
-func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig) (*kafka.Consumer, error) {
+func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig) (*kafka.Reader, error) {
 	// 创建消费者配置
 	// c, err := kafka.NewConsumer(&kafka.ConfigMap{
 	// 	"bootstrap.servers": conf.Customer.Broker,
