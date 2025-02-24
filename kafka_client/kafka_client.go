@@ -1,11 +1,13 @@
 package kafkaclient
 
 import (
+	"crypto/tls"
 	"fmt"
 	"sync"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/segmentio/kafka-go"
+	"github.com/segmentio/kafka-go/sasl/plain"
 )
 
 var (
@@ -15,8 +17,8 @@ var (
 )
 
 type KafkaClientManager struct {
-	ProducerClient [2]map[string]*kafka.Producer
-	ConsumerClient [2]map[string]*kafka.Consumer
+	ProducerClient [2]map[string]*kafka.Writer
+	ConsumerClient [2]map[string]*kafka.Reader
 	index          int
 	rwMutex        sync.RWMutex
 }
@@ -31,13 +33,13 @@ func GetSingleton() *KafkaClientManager {
 
 func NewKafkaClientManager() *KafkaClientManager {
 	return &KafkaClientManager{
-		ProducerClient: [2]map[string]*kafka.Producer{},
-		ConsumerClient: [2]map[string]*kafka.Consumer{},
+		ProducerClient: [2]map[string]*kafka.Writer{},
+		ConsumerClient: [2]map[string]*kafka.Reader{},
 		index:          -1,
 	}
 }
 
-func (k *KafkaClientManager) GetProducerClient(name string) *kafka.Producer {
+func (k *KafkaClientManager) GetProducerClient(name string) *kafka.Writer {
 	k.rwMutex.RLock()
 	defer k.rwMutex.RUnlock()
 	if k.ProducerClient[k.index][name] != nil {
@@ -46,7 +48,7 @@ func (k *KafkaClientManager) GetProducerClient(name string) *kafka.Producer {
 	return nil
 }
 
-func (k *KafkaClientManager) GetConsumerClient(name string) *kafka.Consumer {
+func (k *KafkaClientManager) GetConsumerClient(name string) *kafka.Reader {
 	k.rwMutex.RLock()
 	defer k.rwMutex.RUnlock()
 	if k.ConsumerClient[k.index][name] != nil {
@@ -109,10 +111,10 @@ func (k *KafkaClientManager) buildKafkaClient(e *config_manage.KafkaConfigManage
 		defer k.rwMutex.Unlock()
 		k.index = (k.index + 1) % 2
 		if k.ProducerClient[k.index] == nil {
-			k.ProducerClient[k.index] = make(map[string]*kafka.Producer)
+			k.ProducerClient[k.index] = make(map[string]*kafka.Writer)
 		}
 		if k.ConsumerClient[k.index] == nil {
-			k.ConsumerClient[k.index] = make(map[string]*kafka.Consumer)
+			k.ConsumerClient[k.index] = make(map[string]*kafka.Reader)
 		}
 		k.ProducerClient[k.index][v.Name] = p
 		k.ConsumerClient[k.index][v.Name] = c
@@ -123,36 +125,62 @@ func (k *KafkaClientManager) buildKafkaClient(e *config_manage.KafkaConfigManage
 
 func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*kafka.Producer, error) {
 	// 创建生产者配置
-	p, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": conf.Producer.Broker,
-		"client.id":         conf.Producer.Producer,
-		"acks":              "all",
-		"security.protocol": conf.Producer.Protocol,
-		"sasl.mechanism":    conf.Producer.Mechanism,
-		"sasl.username":     conf.Producer.Username,
-		"sasl.password":     conf.Producer.Password,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create producer: %s", err)
+	mechanism := plain.Mechanism{
+		Username: conf.Producer.Username,
+		Password: conf.Producer.Password,
 	}
-
+	dialer := &kafka.Dialer{
+		SASLMechanism: mechanism,
+		ClientID:      conf.Producer.Producer,
+		TLS:           &tls.Config{},
+	}
+	p := kafka.NewWriter(kafka.WriterConfig{
+		Brokers:  []string{conf.Producer.Broker},
+		Balancer: &kafka.LeastBytes{},
+		Dialer:   dialer,
+	})
+	// p, err := kafka.NewWriter(&kafka.WriterConfig{
+	// 	Brokers: []string{conf.Producer.Broker},
+	// 	Dialer:  dialer,
+	// 	// "client.id":         conf.Producer.Producer,
+	// 	// "acks":              "all",
+	// 	// "security.protocol": conf.Producer.Protocol,
+	// 	// "sasl.mechanism":    conf.Producer.Mechanism,
+	// 	// "sasl.username":     conf.Producer.Username,
+	// 	// "sasl.password":     conf.Producer.Password,
+	// })
 	return p, nil
 
 }
 
 func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig) (*kafka.Consumer, error) {
 	// 创建消费者配置
-	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": conf.Customer.Broker,
-		"group.id":          conf.Customer.Group,
-		"auto.offset.reset": conf.Customer.Reset,
-		"security.protocol": conf.Customer.Protocol,
-		"sasl.mechanism":    conf.Customer.Mechanism,
-		"sasl.username":     conf.Customer.Username,
-		"sasl.password":     conf.Customer.Password,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create consumer: %s", err)
+	// c, err := kafka.NewConsumer(&kafka.ConfigMap{
+	// 	"bootstrap.servers": conf.Customer.Broker,
+	// 	"group.id":          conf.Customer.Group,
+	// 	"auto.offset.reset": conf.Customer.Reset,
+	// 	"security.protocol": conf.Customer.Protocol,
+	// 	"sasl.mechanism":    conf.Customer.Mechanism,
+	// 	"sasl.username":     conf.Customer.Username,
+	// 	"sasl.password":     conf.Customer.Password,
+	// })
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to create consumer: %s", err)
+	// }
+	mechanism := plain.Mechanism{
+		Username: conf.Customer.Username,
+		Password: conf.Customer.Password,
 	}
+
+	dialer := &kafka.Dialer{
+		SASLMechanism: mechanism,
+		TLS:           &tls.Config{},
+	}
+
+	c := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: []string{conf.Customer.Broker},
+		GroupID: conf.Customer.Group,
+		Dialer:  dialer,
+	})
 	return c, nil
 }
