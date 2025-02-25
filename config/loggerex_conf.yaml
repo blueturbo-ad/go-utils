@@ -3,8 +3,8 @@ Dev:
   version: 1
   zap_loggers:
   - name: "handle_logger_1"
-    info: "log//handle_logger_info_{POD_NAME}_1.log"
-    error: "log//handle_logger_err_{POD_NAME}_1.log"
+    info: "./log/handle_logger_info_1.log"
+    error: "./log/handle_logger_err_1.log"
     max_size: 10
     max_backups: 5
     max_age: 30

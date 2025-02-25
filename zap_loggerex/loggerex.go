@@ -127,7 +127,7 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 		value.Info = strings.ReplaceAll(value.Info, "{POD_NAME}", environment.GetPodNameInfo())
 		value.Error = strings.ReplaceAll(value.Error, "{POD_NAME}", environment.GetPodNameInfo())
 		value.Info = strings.ReplaceAll(value.Info, "{DATE}", now)
-		value.Error = strings.ReplaceAll(value.Info, "{DATE}", now)
+		value.Error = strings.ReplaceAll(value.Error, "{DATE}", now)
 		zapLogger := newZapLogger(&value)
 		if zapLogger == nil {
 			return nil

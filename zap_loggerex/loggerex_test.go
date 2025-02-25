@@ -40,7 +40,7 @@ func TestGetLogger(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		var p = fmt.Sprintf("%s\\..\\config\\loggerex_conf.yaml", dir)
+		var p = fmt.Sprintf("%s//..//config//loggerex_conf.yaml", dir)
 		fmt.Println("Current working directory:", p)
 
 		err = logger.UpdateFromFile(p, "Dev")
@@ -51,16 +51,6 @@ func TestGetLogger(t *testing.T) {
 		logger.Info("handle_logger_1", "2222")
 		logger.Warn("handle_logger_1", "3333")
 		logger.Error("handle_logger_1", "4444")
-
-		logger.Debug("handle_logger_2", "1111")
-		logger.Info("handle_logger_2", "2222")
-		logger.Warn("handle_logger_2", "3333")
-		logger.Error("handle_logger_2", "4444")
-
-		logger.Debug("handle_logger_3", "1111")
-		logger.Info("handle_logger_3", "2222")
-		logger.Warn("handle_logger_3", "3333")
-		logger.Error("handle_logger_3", "4444")
 
 	})
 
