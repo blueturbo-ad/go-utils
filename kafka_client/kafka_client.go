@@ -99,8 +99,8 @@ func (k *KafkaClientManager) UpdateFromFile(confPath string, env string) error {
 func (k *KafkaClientManager) buildKafkaClient(e *config_manage.KafkaConfigManage) error {
 	k.rwMutex.Lock()
 	defer k.rwMutex.Unlock()
+	k.index = (k.index + 1) % 2
 	for _, v := range *e.Config {
-		k.index = (k.index + 1) % 2
 		if k.Config[k.index] == nil {
 			k.Config[k.index] = make(map[string]*config_manage.KafkaConfig)
 		}
