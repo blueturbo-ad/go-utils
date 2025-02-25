@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
@@ -97,7 +96,6 @@ func (g *GcpSvcAccountToken) retrieveToken(confs []config_manage.CloudAcc) error
 			return fmt.Errorf("failed to get credentials: %s", err.Error())
 		}
 		token, err := credentials.TokenSource.Token()
-		log.Printf("token: %v, err: %v", token.AccessToken, err)
 		if err != nil {
 			return fmt.Errorf("failed to get token: %s", err.Error())
 		}
