@@ -240,8 +240,8 @@ func (l *LoggerManager) getLogger(name string) (*LoggerWrapper, error) {
 func (l *LoggerManager) Debug(name string, format string, a ...any) error {
 	logger, err := l.getLogger(name)
 	if err != nil {
-		log.Printf("LoggerEx Debug getLogger error:%v", err)
-		return err
+		log.Printf("LoggerEx Debug getLogger name:%s error:%v", name, err)
+		return fmt.Errorf("LoggerEx getLogger name:%s error:%v", name, err)
 	}
 	logger.Debug(format, a...)
 	return nil
@@ -250,122 +250,123 @@ func (l *LoggerManager) Debug(name string, format string, a ...any) error {
 func (l *LoggerManager) Info(name string, format string, a ...any) error {
 	logger, err := l.getLogger(name)
 	if err != nil {
-		log.Printf("LoggerEx Info getLogger error:%v", err)
-		return err
+		log.Printf("LoggerEx Info getLogger name:%s error:%v", name, err)
+		return fmt.Errorf("LoggerEx getLogger name:%s error:%v", name, err)
 	}
-	logger.Info(format, a...)
-	return nil
+	return logger.Info(format, a...)
 }
 
 func (l *LoggerManager) Warn(name string, format string, a ...any) error {
 	logger, err := l.getLogger(name)
 	if err != nil {
-		log.Printf("LoggerEx Warn getLogger error:%v", err)
-		return err
+		log.Printf("LoggerEx Warn getLogger name:%s error:%v", name, err)
+		return fmt.Errorf("LoggerEx getLogger name:%s error:%v", name, err)
 	}
-	logger.Warn(format, a...)
-	return nil
+	return logger.Warn(format, a...)
 }
 
 func (l *LoggerManager) Error(name string, format string, a ...any) error {
 	logger, err := l.getLogger(name)
 	if err != nil {
-		log.Printf("LoggerEx Error getLogger error:%v", err)
-		return err
+		log.Printf("LoggerEx Error getLogger name:%s error:%v", name, err)
+		return fmt.Errorf("LoggerEx getLogger name:%s error:%v", name, err)
 	}
-	logger.Error(format, a...)
-	return nil
+	return logger.Error(format, a...)
 }
 
 func (l *LoggerManager) DPanic(name string, format string, a ...any) error {
 	logger, err := l.getLogger(name)
 	if err != nil {
-		log.Printf("LoggerEx DPanic getLogger error:%v", err)
-		return err
+		log.Printf("LoggerEx DPanic getLogger name:%s error:%v", name, err)
+		return fmt.Errorf("LoggerEx getLogger name:%s error:%v", name, err)
 	}
-	logger.DPanic(format, a...)
-	return nil
+	return logger.DPanic(format, a...)
 }
 
 func (l *LoggerManager) Panic(name string, format string, a ...any) error {
 	logger, err := l.getLogger(name)
 	if err != nil {
-		log.Printf("LoggerEx Panic getLogger error:%v", err)
-		return err
+		log.Printf("LoggerEx Panic getLogger name:%s error:%v", name, err)
+		return fmt.Errorf("LoggerEx getLogger name:%s error:%v", name, err)
 	}
-	logger.Panic(format, a...)
-	return nil
+	return logger.Panic(format, a...)
 }
 
 func (l *LoggerManager) Fatal(name string, format string, a ...any) error {
 	logger, err := l.getLogger(name)
 	if err != nil {
 		log.Printf("LoggerEx Fatal getLogger error:%v", err)
-		return err
+		return fmt.Errorf("LoggerEx getLogger name:%s error:%v", name, err)
 	}
-	logger.Fatal(format, a...)
-	return nil
+	return logger.Fatal(format, a...)
 }
 
-func (l *LoggerWrapper) Debug(format string, fields ...any) {
+func (l *LoggerWrapper) Debug(format string, fields ...any) error {
 	checkedEntry := l.ZapLogger.Check(zapcore.DebugLevel, EmptyString)
 	if checkedEntry == nil {
-		return
+		return fmt.Errorf("LoggerWrapper Debug is nil")
 	}
 	msg := fmt.Sprintf(format, fields...)
 	l.ZapLogger.Debug(msg)
+	return nil
 }
 
-func (l *LoggerWrapper) Info(format string, fields ...any) {
+func (l *LoggerWrapper) Info(format string, fields ...any) error {
 	checkedEntry := l.ZapLogger.Check(zapcore.InfoLevel, EmptyString)
 	if checkedEntry == nil {
-		return
+		return fmt.Errorf("LoggerWrapper Info is nil")
 	}
 	msg := fmt.Sprintf(format, fields...)
 	l.ZapLogger.Info(msg)
+	return nil
 }
 
-func (l *LoggerWrapper) Warn(format string, fields ...any) {
+func (l *LoggerWrapper) Warn(format string, fields ...any) error {
 	checkedEntry := l.ZapLogger.Check(zapcore.WarnLevel, EmptyString)
 	if checkedEntry == nil {
-		return
+		return fmt.Errorf("LoggerWrapper Warn is nil")
 	}
 	msg := fmt.Sprintf(format, fields...)
 	l.ZapLogger.Warn(msg)
+	return nil
 }
 
-func (l *LoggerWrapper) Error(format string, fields ...any) {
+func (l *LoggerWrapper) Error(format string, fields ...any) error {
 	checkedEntry := l.ZapLogger.Check(zapcore.WarnLevel, EmptyString)
 	if checkedEntry == nil {
-		return
+		return fmt.Errorf("LoggerWrapper Error is nil")
 	}
 	msg := fmt.Sprintf(format, fields...)
 	l.ZapLogger.Error(msg)
+	return nil
 }
 
-func (l *LoggerWrapper) DPanic(format string, fields ...any) {
+func (l *LoggerWrapper) DPanic(format string, fields ...any) error {
 	checkedEntry := l.ZapLogger.Check(zapcore.DPanicLevel, EmptyString)
 	if checkedEntry == nil {
-		return
+		return fmt.Errorf("LoggerWrapper DPanic is nil")
 	}
 	msg := fmt.Sprintf(format, fields...)
 	l.ZapLogger.DPanic(msg)
+	return nil
 }
 
-func (l *LoggerWrapper) Panic(format string, fields ...any) {
+func (l *LoggerWrapper) Panic(format string, fields ...any) error {
 	checkedEntry := l.ZapLogger.Check(zapcore.PanicLevel, EmptyString)
 	if checkedEntry == nil {
-		return
+		return fmt.Errorf("LoggerWrapper Panic is nil")
 	}
 	msg := fmt.Sprintf(format, fields...)
 	l.ZapLogger.Panic(msg)
+	return nil
 }
 
-func (l *LoggerWrapper) Fatal(format string, fields ...any) {
+func (l *LoggerWrapper) Fatal(format string, fields ...any) error {
 	checkedEntry := l.ZapLogger.Check(zapcore.FatalLevel, EmptyString)
 	if checkedEntry == nil {
-		return
+		return fmt.Errorf("LoggerWrapper Fatal is nil")
 	}
 	msg := fmt.Sprintf(format, fields...)
 	l.ZapLogger.Fatal(msg)
+	return nil
 }
