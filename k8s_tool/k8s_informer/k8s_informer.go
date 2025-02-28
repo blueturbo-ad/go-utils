@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
+
+	"sync"
 	"time"
 
 	"github.com/blueturbo-ad/go-utils/environment"
@@ -45,6 +46,11 @@ func (i *Informer) SetUp() error {
 	var err error
 	i.cacheInitFuns = make(map[string]func(configMapName, env string) error)
 	i.k8sClient = k8sclient.GetSingleton().GetClient()
+	namespace := environment.GetSingleton().GetNamespace()
+	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, 60*time.Minute, informers.WithNamespace(namespace))
+	// 创建 ConfigMap Informer
+	informer := factory.Core().V1().ConfigMaps().Informer()
+	i.Informer = &informer
 	if err != nil {
 		return err
 	}
@@ -54,13 +60,7 @@ func (i *Informer) SetUp() error {
 // 这里关闭的自动同步是在同步日志配置的时候 由于buff的切换丢失了上一次的file 对象
 func (i *Informer) Run() {
 	// 创建 Informer 工厂
-	namespace := environment.GetSingleton().GetNamespace()
-	loggerex.GetSingleton().Info("system_logger", "namespace: %s", namespace)
-	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, 60*time.Minute, informers.WithNamespace(namespace))
-
-	// 创建 ConfigMap Informer
-	informer := factory.Core().V1().ConfigMaps().Informer()
-	i.Informer = &informer
+	informer := (*i.Informer)
 	// 添加事件处理程序
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {

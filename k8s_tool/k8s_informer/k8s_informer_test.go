@@ -20,6 +20,8 @@ func TestK8sInformer(t *testing.T) {
 		if err := GetInformerSingleton().SetUp(); err != nil {
 			assert.NoError(t, err)
 		}
+		Informer := GetInformerSingleton().Informer
+		assert.NotNil(t, Informer)
 		GetInformerSingleton().RegisterCacheInitFun("dsp-logger", logger.GetSingleton().UpdateLoadK8sConfigMap)
 		GetInformerSingleton().Run()
 	})
