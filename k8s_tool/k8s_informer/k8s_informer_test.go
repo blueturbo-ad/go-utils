@@ -29,6 +29,8 @@ func TestK8sInformer(t *testing.T) {
 			select {
 			case err := <-GetInformerSingleton().ErrChan:
 				assert.NoError(t, err)
+			case <-GetInformerSingleton().Schan:
+				break
 			}
 		}
 	})
