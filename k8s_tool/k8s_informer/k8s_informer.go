@@ -1,6 +1,8 @@
 package k8s_informer
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -32,6 +34,7 @@ func GetInformerSingleton() *Informer {
 type Informer struct {
 	cacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
+	informer      cache.SharedIndexInformer
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
@@ -97,10 +100,25 @@ func (i *Informer) Run() {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
+	i.informer = informer
+
 	go informer.Run(stopCh)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	// 等待缓存同步
-	if !cache.WaitForCacheSync(stopCh, informer.HasSynced) {
-		loggerex.GetSingleton().Error("system_logger", "Error waiting for cache to sync")
+	if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
+		select {
+		case <-ctx.Done():
+			// 检查是否因超时失败
+			if ctx.Err() == context.DeadlineExceeded {
+				panic(errors.New("同步超时：无法在30秒内完成缓存同步"))
+			}
+			panic(fmt.Errorf("同步被取消: %v", ctx.Err()))
+		default:
+			panic(errors.New("缓存同步失败"))
+		}
 	}
 	// 等待信号以退出程序
 	sigs := make(chan os.Signal, 1)
