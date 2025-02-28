@@ -34,7 +34,7 @@ func GetInformerSingleton() *Informer {
 type Informer struct {
 	cacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
-	informer      cache.SharedIndexInformer
+	Informer      cache.SharedIndexInformer
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
@@ -100,7 +100,7 @@ func (i *Informer) Run() {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
-	i.informer = informer
+	i.Informer = informer
 
 	go informer.Run(stopCh)
 
