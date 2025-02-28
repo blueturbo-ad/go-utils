@@ -38,10 +38,12 @@ type Informer struct {
 	Informer      *cache.SharedIndexInformer
 	ErrChan       chan error
 	FuncLen       int
+	cacheFunc     map[string]bool
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
 	i.cacheInitFuns[key] = fun
+	i.cacheFunc[key] = false
 }
 
 func (i *Informer) SetUp() error {
@@ -54,6 +56,7 @@ func (i *Informer) SetUp() error {
 	informer := factory.Core().V1().ConfigMaps().Informer()
 	i.Informer = &informer
 	i.ErrChan = make(chan error, 100)
+	i.cacheFunc = make(map[string]bool)
 
 	if err != nil {
 		return err
@@ -71,28 +74,23 @@ func (i *Informer) Run() {
 			configMap := obj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
-			if configMap.Name == "kube-root-ca.crt" {
-				return
-			}
 			if initFunc, exists := i.cacheInitFuns[configMap.Name]; exists {
 				if err := initFunc(configMap.Name, env); err != nil {
 					msg := fmt.Sprintf("add config map error: %s", err.Error())
 					loggerex.GetSingleton().Error("system_logger", "%s", msg)
 					i.ErrChan <- fmt.Errorf("%s", msg)
+				} else {
+					i.cacheFunc[configMap.Name] = true
 				}
 			} else {
 				msg := fmt.Sprintf("No init function found for config map: %s", configMap.Name)
 				loggerex.GetSingleton().Error("system_logger", "%s", msg)
-				i.ErrChan <- fmt.Errorf("%s", msg)
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			oldConfigMap := oldObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
-			if newConfigMap.Name == "kube-root-ca.crt" {
-				return
-			}
 			loggerex.GetSingleton().Info("system_logger", "update config map: %s \n", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
 				if IsConfigMapEqual(oldConfigMap, newConfigMap) {
@@ -102,11 +100,12 @@ func (i *Informer) Run() {
 					msg := fmt.Sprintf("update config map error: %s", err.Error())
 					loggerex.GetSingleton().Error("system_logger", "%s", msg)
 					i.ErrChan <- fmt.Errorf("%s", msg)
+				} else {
+					i.cacheFunc[newConfigMap.Name] = true
 				}
 			} else {
 				msg := fmt.Sprintf("No init function found for config map: %s", newConfigMap.Name)
 				loggerex.GetSingleton().Error("system_logger", "%s", msg)
-				i.ErrChan <- fmt.Errorf("%s", msg)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
@@ -123,7 +122,10 @@ func (i *Informer) Run() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-
+	if err := i.CheckIsRun(); err != nil {
+		i.ErrChan <- err
+		close(stopCh)
+	}
 	// 等待缓存同步
 	if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
 		select {
@@ -142,6 +144,15 @@ func (i *Informer) Run() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	<-sigs
+}
+
+func (i *Informer) CheckIsRun() error {
+	for key, value := range i.cacheFunc {
+		if !value {
+			return fmt.Errorf("cache %s is not run", key)
+		}
+	}
+	return nil
 }
 
 // IsConfigMapEqual 判断两个 ConfigMap 是否相同
