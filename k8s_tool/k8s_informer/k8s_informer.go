@@ -36,7 +36,7 @@ type Informer struct {
 	cacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
 	Informer      *cache.SharedIndexInformer
-	SuccChan      chan string
+	ErrChan       chan error
 	FuncLen       int
 }
 
@@ -53,7 +53,7 @@ func (i *Informer) SetUp() error {
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
 	i.Informer = &informer
-	i.SuccChan = make(chan string, 100)
+	i.ErrChan = make(chan error, 100)
 
 	if err != nil {
 		return err
@@ -75,13 +75,12 @@ func (i *Informer) Run() {
 				if err := initFunc(configMap.Name, env); err != nil {
 					msg := fmt.Sprintf("add config map error: %s", err.Error())
 					loggerex.GetSingleton().Error("system_logger", "%s", msg)
-
-				} else {
-					i.SuccChan <- fmt.Sprintf("%s configmap success", configMap.Name)
+					i.ErrChan <- fmt.Errorf("%s", msg)
 				}
 			} else {
 				msg := fmt.Sprintf("No init function found for config map: %s", configMap.Name)
 				loggerex.GetSingleton().Error("system_logger", "%s", msg)
+				i.ErrChan <- fmt.Errorf("%s", msg)
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -91,19 +90,17 @@ func (i *Informer) Run() {
 			loggerex.GetSingleton().Info("system_logger", "update config map: %s \n", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
 				if IsConfigMapEqual(oldConfigMap, newConfigMap) {
-					i.SuccChan <- fmt.Sprintf("%s configmap success", newConfigMap.Name)
 					return
 				}
 				if err := initFunc(newConfigMap.Name, env); err != nil {
 					msg := fmt.Sprintf("update config map error: %s", err.Error())
 					loggerex.GetSingleton().Error("system_logger", "%s", msg)
-
-				} else {
-					i.SuccChan <- fmt.Sprintf("%s configmap success", newConfigMap.Name)
+					i.ErrChan <- fmt.Errorf("%s", msg)
 				}
 			} else {
 				msg := fmt.Sprintf("No init function found for config map: %s", newConfigMap.Name)
 				loggerex.GetSingleton().Error("system_logger", "%s", msg)
+				i.ErrChan <- fmt.Errorf("%s", msg)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
@@ -127,11 +124,10 @@ func (i *Informer) Run() {
 		case <-ctx.Done():
 			// 检查是否因超时失败
 			if ctx.Err() == context.DeadlineExceeded {
-				panic(errors.New("同步超时：无法在30秒内完成缓存同步"))
+				i.ErrChan <- fmt.Errorf("缓存同步超时")
 			}
-			panic(fmt.Errorf("同步被取消: %v", ctx.Err()))
 		default:
-			panic(errors.New("缓存同步失败"))
+			i.ErrChan <- errors.New("缓存同步失败")
 		}
 	}
 	// 等待信号以退出程序
