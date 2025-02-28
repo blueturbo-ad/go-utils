@@ -138,6 +138,9 @@ func (i *Informer) Run() {
 				}
 				return
 			default:
+				if err := i.CheckIsRun(); err == nil {
+					return
+				}
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
