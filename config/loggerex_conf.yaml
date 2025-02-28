@@ -13,9 +13,9 @@ Dev:
     async: false
 
 
-  - name: "handle_logger_2"
-    info: "log//handle_logger_info_{POD_NAME}_2.log"
-    error: "log//handle_logger_err_{POD_NAME}_2.log"
+  - name: "system_logger"
+    info: "./log/system_logger.log"
+    error: "./log/system_logger_error.log"
     max_size: 20
     max_backups: 10
     max_age: 60

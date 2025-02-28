@@ -25,6 +25,9 @@ import (
 
  */
 
+// 打印到一份日志文件 添加到这个数组中
+var globalLogName = []string{"system_logger"}
+
 type LoggerWrapper struct {
 	ZapLogger *zap.Logger
 }
@@ -167,13 +170,23 @@ func newZapLogger(conf *config_manage.LoggerConfig) *zap.Logger {
 	return zap.New(zapcore.NewTee(highCore, lowCore), zap.AddCaller(), zap.AddCallerSkip(2))
 }
 
+func containsString(slice []string, str string) bool {
+	for _, v := range slice {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
 func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.WriteSyncer {
 	var info string
-	if isinfo {
+	if isinfo || containsString(globalLogName, conf.Name) {
 		info = conf.Info
 	} else {
 		info = conf.Error
 	}
+
 	if len(info) == 0 {
 		log.Printf("LoggerEx logger path length is 0")
 	}
