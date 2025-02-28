@@ -34,7 +34,7 @@ func GetInformerSingleton() *Informer {
 type Informer struct {
 	cacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
-	Informer      cache.SharedIndexInformer
+	Informer      *cache.SharedIndexInformer
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
@@ -60,7 +60,7 @@ func (i *Informer) Run() {
 
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
-	i.Informer = informer
+	i.Informer = &informer
 	// 添加事件处理程序
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
