@@ -122,27 +122,29 @@ func (i *Informer) Run() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	if err := i.CheckIsRun(); err != nil {
-		i.ErrChan <- err
-		close(stopCh)
-	}
+
 	// 等待缓存同步
-	if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
-		select {
-		case <-ctx.Done():
-			// 检查是否因超时失败
-			if ctx.Err() == context.DeadlineExceeded {
-				i.ErrChan <- fmt.Errorf("缓存同步超时")
-				close((stopCh))
+	go func() {
+		for {
+			if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
+				i.ErrChan <- errors.New("缓存同步失败")
 			}
-		default:
-			i.ErrChan <- errors.New("缓存同步失败")
+			select {
+			case <-ctx.Done():
+				fmt.Println("cache sync done")
+				if err := i.CheckIsRun(); err != nil {
+					i.ErrChan <- err
+					return
+				}
+				return
+			default:
+				time.Sleep(100 * time.Millisecond)
+			}
 		}
-	}
+	}()
 	// 等待信号以退出程序
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
 	<-sigs
 }
 

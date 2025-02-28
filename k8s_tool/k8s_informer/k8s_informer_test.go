@@ -23,6 +23,13 @@ func TestK8sInformer(t *testing.T) {
 		Informer := GetInformerSingleton().Informer
 		assert.NotNil(t, Informer)
 		GetInformerSingleton().RegisterCacheInitFun("dsp-logger", logger.GetSingleton().UpdateLoadK8sConfigMap)
-		GetInformerSingleton().Run()
+		GetInformerSingleton().RegisterCacheInitFun("feishu", logger.GetSingleton().UpdateLoadK8sConfigMap)
+		go GetInformerSingleton().Run()
+		for {
+			select {
+			case err := <-GetInformerSingleton().ErrChan:
+				assert.NoError(t, err)
+			}
+		}
 	})
 }
