@@ -60,6 +60,7 @@ func (i *Informer) Run() {
 
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
+	i.Informer = informer
 	// 添加事件处理程序
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -99,8 +100,6 @@ func (i *Informer) Run() {
 	// 启动 Informer
 	stopCh := make(chan struct{})
 	defer close(stopCh)
-
-	i.Informer = informer
 
 	go informer.Run(stopCh)
 
