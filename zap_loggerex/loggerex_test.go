@@ -52,6 +52,10 @@ func TestGetLogger(t *testing.T) {
 		logger.Warn("handle_logger_1", "3333")
 		logger.Error("handle_logger_1", "4444")
 
+		logger.Info("system_logger", "2222")
+		logger.Warn("system_logger", "3333")
+		logger.Error("system_logger", "4444")
+
 	})
 
 	t.Run("testBaseLoggerConfig1", func(t *testing.T) {
