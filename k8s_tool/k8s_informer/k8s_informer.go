@@ -39,6 +39,7 @@ type Informer struct {
 	ErrChan       chan error
 	FuncLen       int
 	cacheFunc     map[string]bool
+	schan         chan bool
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
@@ -57,6 +58,7 @@ func (i *Informer) SetUp() error {
 	i.Informer = &informer
 	i.ErrChan = make(chan error, 100)
 	i.cacheFunc = make(map[string]bool)
+	i.schan = make(chan bool, 10)
 
 	if err != nil {
 		return err
@@ -139,6 +141,7 @@ func (i *Informer) Run() {
 				return
 			default:
 				if err := i.CheckIsRun(); err == nil {
+					i.schan <- true
 					return
 				}
 				time.Sleep(100 * time.Millisecond)
