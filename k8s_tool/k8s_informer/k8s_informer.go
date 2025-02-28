@@ -71,6 +71,9 @@ func (i *Informer) Run() {
 			configMap := obj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
+			if configMap.Name == "kube-root-ca.crt" {
+				return
+			}
 			if initFunc, exists := i.cacheInitFuns[configMap.Name]; exists {
 				if err := initFunc(configMap.Name, env); err != nil {
 					msg := fmt.Sprintf("add config map error: %s", err.Error())
@@ -87,6 +90,9 @@ func (i *Informer) Run() {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			oldConfigMap := oldObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
+			if newConfigMap.Name == "kube-root-ca.crt" {
+				return
+			}
 			loggerex.GetSingleton().Info("system_logger", "update config map: %s \n", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
 				if IsConfigMapEqual(oldConfigMap, newConfigMap) {
@@ -125,6 +131,7 @@ func (i *Informer) Run() {
 			// 检查是否因超时失败
 			if ctx.Err() == context.DeadlineExceeded {
 				i.ErrChan <- fmt.Errorf("缓存同步超时")
+				close((stopCh))
 			}
 		default:
 			i.ErrChan <- errors.New("缓存同步失败")
