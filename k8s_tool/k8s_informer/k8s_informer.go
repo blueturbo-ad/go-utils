@@ -36,6 +36,8 @@ type Informer struct {
 	cacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
 	Informer      *cache.SharedIndexInformer
+	SuccChan      chan string
+	FuncLen       int
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
@@ -51,6 +53,8 @@ func (i *Informer) SetUp() error {
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
 	i.Informer = &informer
+	i.SuccChan = make(chan string, 100)
+
 	if err != nil {
 		return err
 	}
@@ -69,10 +73,15 @@ func (i *Informer) Run() {
 			loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
 			if initFunc, exists := i.cacheInitFuns[configMap.Name]; exists {
 				if err := initFunc(configMap.Name, env); err != nil {
-					loggerex.GetSingleton().Error("system_logger", "add config map error : %s", err.Error())
+					msg := fmt.Sprintf("add config map error: %s", err.Error())
+					loggerex.GetSingleton().Error("system_logger", "%s", msg)
+
+				} else {
+					i.SuccChan <- fmt.Sprintf("%s configmap success", configMap.Name)
 				}
 			} else {
-				loggerex.GetSingleton().Error("system_logger", "No init function found for config map: %s", configMap.Name)
+				msg := fmt.Sprintf("No init function found for config map: %s", configMap.Name)
+				loggerex.GetSingleton().Error("system_logger", "%s", msg)
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -82,13 +91,19 @@ func (i *Informer) Run() {
 			loggerex.GetSingleton().Info("system_logger", "update config map: %s \n", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
 				if IsConfigMapEqual(oldConfigMap, newConfigMap) {
+					i.SuccChan <- fmt.Sprintf("%s configmap success", newConfigMap.Name)
 					return
 				}
 				if err := initFunc(newConfigMap.Name, env); err != nil {
-					loggerex.GetSingleton().Error("system_logger", "update config map error : %s \n", err.Error())
+					msg := fmt.Sprintf("update config map error: %s", err.Error())
+					loggerex.GetSingleton().Error("system_logger", "%s", msg)
+
+				} else {
+					i.SuccChan <- fmt.Sprintf("%s configmap success", newConfigMap.Name)
 				}
 			} else {
-				loggerex.GetSingleton().Error("system_logger", "No init function found for config map: %s", newConfigMap.Name)
+				msg := fmt.Sprintf("No init function found for config map: %s", newConfigMap.Name)
+				loggerex.GetSingleton().Error("system_logger", "%s", msg)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
@@ -122,6 +137,7 @@ func (i *Informer) Run() {
 	// 等待信号以退出程序
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
 	<-sigs
 }
 
