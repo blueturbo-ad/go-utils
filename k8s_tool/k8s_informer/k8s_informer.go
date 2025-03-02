@@ -36,10 +36,9 @@ type Informer struct {
 	cacheInitFuns map[string]func(configMapName, env string) error
 	k8sClient     *kubernetes.Clientset
 	Informer      *cache.SharedIndexInformer
-	ErrChan       chan error
-	FuncLen       int
-	cacheFunc     map[string]bool
-	Schan         chan bool
+	StartErrChan  chan error
+	cacheFunc     map[string]bool // 这里只记录add 的状态 add 只在首次启动的时候会加载
+	Ssucchan      chan bool       // 首次启动等待时间是30s 如果我们提前启动完成就给这个信号来通知
 }
 
 func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string) error) {
@@ -56,9 +55,9 @@ func (i *Informer) SetUp() error {
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
 	i.Informer = &informer
-	i.ErrChan = make(chan error, 100)
+	i.StartErrChan = make(chan error, 100)
 	i.cacheFunc = make(map[string]bool)
-	i.Schan = make(chan bool, 10)
+	i.Ssucchan = make(chan bool, 10)
 
 	if err != nil {
 		return err
@@ -80,13 +79,13 @@ func (i *Informer) Run() {
 				if err := initFunc(configMap.Name, env); err != nil {
 					msg := fmt.Sprintf("add config map error: %s", err.Error())
 					loggerex.GetSingleton().Error("system_logger", "%s", msg)
-					i.ErrChan <- fmt.Errorf("%s", msg)
+					i.StartErrChan <- fmt.Errorf("%s", msg)
 				} else {
 					i.cacheFunc[configMap.Name] = true
 				}
 			} else {
 				msg := fmt.Sprintf("No init function found for config map: %s", configMap.Name)
-				loggerex.GetSingleton().Error("system_logger", "%s", msg)
+				loggerex.GetSingleton().Warn("system_logger", "%s", msg)
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -101,13 +100,10 @@ func (i *Informer) Run() {
 				if err := initFunc(newConfigMap.Name, env); err != nil {
 					msg := fmt.Sprintf("update config map error: %s", err.Error())
 					loggerex.GetSingleton().Error("system_logger", "%s", msg)
-					i.ErrChan <- fmt.Errorf("%s", msg)
-				} else {
-					i.cacheFunc[newConfigMap.Name] = true
 				}
 			} else {
 				msg := fmt.Sprintf("No init function found for config map: %s", newConfigMap.Name)
-				loggerex.GetSingleton().Error("system_logger", "%s", msg)
+				loggerex.GetSingleton().Warn("system_logger", "%s", msg)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
@@ -129,19 +125,19 @@ func (i *Informer) Run() {
 	go func() {
 		for {
 			if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
-				i.ErrChan <- errors.New("缓存同步失败")
+				i.StartErrChan <- errors.New("缓存同步失败")
 			}
 			select {
 			case <-ctx.Done():
 				fmt.Println("cache sync done")
 				if err := i.CheckIsRun(); err != nil {
-					i.ErrChan <- err
+					i.StartErrChan <- err
 					return
 				}
 				return
 			default:
 				if err := i.CheckIsRun(); err == nil {
-					i.Schan <- true
+					i.Ssucchan <- true
 					return
 				}
 				time.Sleep(100 * time.Millisecond)

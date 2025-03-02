@@ -27,9 +27,9 @@ func TestK8sInformer(t *testing.T) {
 		go GetInformerSingleton().Run()
 		for {
 			select {
-			case err := <-GetInformerSingleton().ErrChan:
+			case err := <-GetInformerSingleton().StartErrChan:
 				assert.NoError(t, err)
-			case <-GetInformerSingleton().Schan:
+			case <-GetInformerSingleton().Ssucchan:
 				break
 			}
 		}
