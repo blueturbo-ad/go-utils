@@ -49,7 +49,7 @@ func (k *KafkaClientManager) GetProducerClient(name string) (*kafka.Producer, er
 func (k *KafkaClientManager) GetConsumerClient(name string) (*kafka.Consumer, error) {
 	k.rwMutex.RLock()
 	defer k.rwMutex.RUnlock()
-	if k.ConsumerClient[k.index][name] != nil {
+	if k.Config[k.index][name] != nil {
 		config := k.Config[k.index][name]
 		return k.buildConsumer(config)
 	}

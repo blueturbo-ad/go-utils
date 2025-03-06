@@ -3,8 +3,11 @@ package kafkaclient
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 
+	"github.com/blueturbo-ad/go-utils/environment"
+	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
@@ -13,6 +16,10 @@ type KafkaMsg struct {
 }
 
 func TestKafkaClient(t *testing.T) {
+	os.Setenv("POD_NAMESPACE", "dsp-ns")
+	environment.Init()
+	k8sclient.GetSingleton().SetUp()
+	GetSingleton().UpdateLoadK8sConfigMap("kafka-config", "Pro")
 	t.Run("kafka client producer", func(t *testing.T) {
 		p, err := GetSingleton().GetProducerClient("win_kafka")
 		if err != nil {
@@ -76,7 +83,7 @@ func TestKafkaClient(t *testing.T) {
 			fmt.Printf("failed to subscribe topic: %s\n", err)
 			return
 		}
-		go func() {
+		func() {
 			for {
 				msg, err := c.ReadMessage(-1)
 				if err == nil {
