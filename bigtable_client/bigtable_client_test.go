@@ -2,6 +2,7 @@ package bigtableclient
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -28,7 +29,7 @@ func TestBigtableclient(t *testing.T) {
 			t.Errorf("GetSingleton() = %v; want nil", err)
 		}
 		client := cliobj.GetClient()
-		tb1 := client.Open("test-01")
+		tb1 := client.Open("test-02")
 
 		// 插入一条数据
 		rowKey := "row-key-1"
@@ -39,6 +40,30 @@ func TestBigtableclient(t *testing.T) {
 		err := tb1.Apply(ctx, rowKey, mut)
 		if err != nil {
 			t.Errorf("Could not apply mutation: %v", err)
+		}
+
+	})
+	t.Run("test bigtable read", func(t *testing.T) {
+		ctx := context.Background()
+		cliobj := GetSingleton()
+		if err := cliobj.UpdateLoadK8sConfigMap("bigtable", "Dev"); err != nil {
+			t.Errorf("GetSingleton() = %v; want nil", err)
+		}
+		client := cliobj.GetClient()
+		tb1 := client.Open("test-02")
+
+		// 插入一条数据
+		rowKey := "row-key-1"
+		err := tb1.ReadRows(ctx, bigtable.PrefixRange(rowKey), func(row bigtable.Row) bool {
+			for _, ris := range row {
+				for _, ri := range ris {
+					fmt.Printf("Row: %s, Column: %s, Value: %s\n", row.Key(), ri.Column, string(ri.Value))
+				}
+			}
+			return true
+		})
+		if err != nil {
+			t.Errorf("Could not read row: %v", err)
 		}
 	})
 	// t.Run("Test mutation and read", func(t *testing.T) {
