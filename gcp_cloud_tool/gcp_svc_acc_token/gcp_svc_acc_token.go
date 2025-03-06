@@ -3,21 +3,17 @@ package gcpcloudtool
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
 	gcpcloudstorage "github.com/blueturbo-ad/go-utils/gcp_cloud_tool/gcp_cloud_storage"
-	"github.com/golang/protobuf/ptypes"
-	"google.golang.org/api/option"
-	gtransport "google.golang.org/api/transport/grpc"
-	"google.golang.org/genproto/googleapis/iam/credentials/v1"
+	auth "golang.org/x/oauth2/google"
 )
 
 var (
-	instance    *GcpSvcAccountToken
+	instance *GcpSvcAccountToken
+
 	once        sync.Once
 	EmptyString = ""
 )
@@ -82,30 +78,31 @@ func (g *GcpSvcAccountToken) retrieveToken(confs []config_manage.CloudAcc) error
 	g.confs = confs
 	for _, v := range confs {
 		ctx := context.Background()
-		conn, err := gtransport.Dial(ctx,
-			option.WithEndpoint("iamcredentials.googleapis.com:443"),
-			option.WithScopes("https://www.googleapis.com/auth/cloud-platform"))
-
+		result := make(map[string]string)
+		err := json.Unmarshal([]byte(v.AccountPremession), &result)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to unmarshal account permission: %s", err.Error())
 		}
-		client := credentials.NewIAMCredentialsClient(conn)
-
-		apiKey := fmt.Sprintf("projects/-/serviceAccounts/%s", v.AccountEmail)
-		svcAccount := flag.String("a", apiKey, v.AccountEmail)
-		req := credentials.GenerateAccessTokenRequest{
-			Name:     *svcAccount,
-			Scope:    []string{"https://www.googleapis.com/auth/cloud-platform"},
-			Lifetime: ptypes.DurationProto(*flag.Duration("d", time.Hour, "lifetime of token")),
-		}
-		rsp, err := client.GenerateAccessToken(ctx, &req)
+		data, err := json.Marshal(result)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to marshal account permission: %s", err.Error())
+		}
+		scopes := []string{
+			"https://www.googleapis.com/auth/cloud-platform",
+		}
+		credentials, err := auth.CredentialsFromJSON(ctx, data, scopes...)
+		if err != nil {
+			// log.Printf("found default credentials. %v", credentials)
+			return fmt.Errorf("failed to get credentials: %s", err.Error())
+		}
+		token, err := credentials.TokenSource.Token()
+		if err != nil {
+			return fmt.Errorf("failed to get token: %s", err.Error())
 		}
 		if g.Tokens == nil {
 			g.Tokens = make(map[string]string)
 		}
-		g.Tokens[v.Name] = rsp.AccessToken
+		g.Tokens[v.Name] = token.AccessToken
 
 	}
 	t, err := json.Marshal(g.Tokens)
