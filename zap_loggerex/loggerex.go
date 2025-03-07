@@ -125,12 +125,8 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 	l.rwMutex.Lock()
 	defer l.rwMutex.Unlock()
 	var loger = new(LoggerEx) //生成新的数据
-	now := time.Now().Format("2006-01-02")
+
 	for _, value := range config.Loggers {
-		value.Info = strings.ReplaceAll(value.Info, "{POD_NAME}", environment.GetPodNameInfo())
-		value.Error = strings.ReplaceAll(value.Error, "{POD_NAME}", environment.GetPodNameInfo())
-		value.Info = strings.ReplaceAll(value.Info, "{DATE}", now)
-		value.Error = strings.ReplaceAll(value.Error, "{DATE}", now)
 		zapLogger := newZapLogger(&value)
 		if zapLogger == nil {
 			return nil
@@ -178,6 +174,14 @@ func containsString(slice []string, str string) bool {
 	}
 	return false
 }
+func dynamicBuildFilePath(info string) string {
+	now := time.Now().Format("2006-01-02")
+	info = strings.ReplaceAll(info, "{POD_NAME}", environment.GetPodNameInfo())
+	info = strings.ReplaceAll(info, "{POD_NAME}", environment.GetPodNameInfo())
+	info = strings.ReplaceAll(info, "{DATE}", now)
+	info = strings.ReplaceAll(info, "{DATE}", now)
+	return info
+}
 
 func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.WriteSyncer {
 	var info string
@@ -193,7 +197,7 @@ func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.Wr
 	var hookFunc func(string) = nil
 
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   info,
+		Filename:   dynamicBuildFilePath(info),
 		MaxSize:    conf.MaxSize,
 		MaxBackups: conf.MaxBackups,
 		MaxAge:     conf.MaxAge,
