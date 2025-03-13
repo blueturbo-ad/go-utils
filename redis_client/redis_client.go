@@ -63,7 +63,7 @@ func (l *RedisClientManager) UpdateLoadK8sConfigMap(configMapName, env string) e
 	if err != nil {
 		return fmt.Errorf("redis client  LoadK8sConfigMap is error %s", err.Error())
 	}
-	return l.refreshRedisClient(e)
+	return l.refreshRedisClient(e, env)
 }
 
 // 函数用于内存更新etcd配置
@@ -78,7 +78,7 @@ func (r *RedisClientManager) UpdateFromEtcd(env string, eventType string, key st
 		if err != nil {
 			return err
 		}
-		if err := r.refreshRedisClient(e); err != nil {
+		if err := r.refreshRedisClient(e, env); err != nil {
 			return err
 		}
 	default:
@@ -94,45 +94,39 @@ func (f *RedisClientManager) UpdateFromFile(confPath string, env string) error {
 	if err != nil {
 		return err
 	}
-	return f.refreshRedisClient(e)
+	return f.refreshRedisClient(e, env)
 }
-func (r *RedisClientManager) refreshRedisClient(confs *redisconfigmanger.RedisConfigManager) error {
+func (r *RedisClientManager) refreshRedisClient(confs *redisconfigmanger.RedisConfigManager, env string) error {
 	r.rwMutex.Lock()
 	defer r.rwMutex.Unlock()
 	newIndex := (r.index + 1) % 2
 	r.ReadClient[newIndex] = make(map[string]*redis.ClusterClient)
 	r.WriteClient[newIndex] = make(map[string]*redis.ClusterClient)
 	for _, v := range *confs.Config {
-		r.ReadClient[newIndex][v.Name] = r.BuildReadRedisClient(&v)
-		r.WriteClient[newIndex][v.Name] = r.BuildWriteRedisClient(&v)
+		r.ReadClient[newIndex][v.Name] = r.BuildReadRedisClient(&v, env)
+		r.WriteClient[newIndex][v.Name] = r.BuildWriteRedisClient(&v, env)
 	}
 	r.index = newIndex
 	return nil
 }
 
-func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
+func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.RedisConfig, env string) *redis.ClusterClient {
 	// username, password, _ := r.retrieveTokenFunc(conf)
 	return redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:        []string{conf.WritePool.Nodes[0]},
-		ReadTimeout:  time.Duration(conf.WritePool.Timeout) * time.Millisecond,
-		WriteTimeout: time.Duration(conf.WritePool.Timeout) * time.Millisecond,
-		PoolSize:     conf.WritePool.PoolSize,
-		// Username:     username,
-		// Password:     password,
-		// CredentialsProvider: func() (string, string) {
-		// 	username, passoword, err := r.retrieveTokenFunc(conf)
-		// 	if err != nil {
-		// 		fmt.Println("retrieveTokenFunc error:", err.Error())
-		// 		return EmptyString, EmptyString
-		// 	}
-		// 	return username, passoword
-		// },
+		Addrs:           []string{conf.WritePool.Nodes[0]},
+		ReadTimeout:     time.Duration(conf.WritePool.Timeout) * time.Millisecond,
+		WriteTimeout:    time.Duration(conf.WritePool.Timeout) * time.Millisecond,
+		PoolSize:        conf.WritePool.PoolSize,
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
 		NewClient: func(opt *redis.Options) *redis.Client {
-			username, password, err := r.retrieveTokenFunc(conf)
-			opt.Username = username
-			opt.Password = password
+			username, password, err := r.retrieveTokenFunc(conf, env)
+			if username != "" {
+				opt.Username = username
+			}
+			if password == "" {
+				opt.Password = password
+			}
 			if err != nil {
 				fmt.Println("retrieveTokenFunc error:", err.Error())
 			}
@@ -141,24 +135,23 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 	})
 }
 
-func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisConfig) *redis.ClusterClient {
+func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisConfig, env string) *redis.ClusterClient {
 	// username, password, _ := r.retrieveTokenFunc(conf)
 	return redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:        []string{conf.ReadPool.Nodes[0]},
-		ReadTimeout:  time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
-		WriteTimeout: time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
-		PoolSize:     conf.ReadPool.PoolSize,
-		// Username:     username,
-		// Password:     password,
-		// CredentialsProviderContext: func(ctx context.Context) (username string, password string, err error) {
-		// 	return r.retrieveTokenFunc(conf)
-		// },
+		Addrs:           []string{conf.ReadPool.Nodes[0]},
+		ReadTimeout:     time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
+		WriteTimeout:    time.Duration(conf.ReadPool.Timeout) * time.Millisecond,
+		PoolSize:        conf.ReadPool.PoolSize,
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
 		NewClient: func(opt *redis.Options) *redis.Client {
-			username, password, err := r.retrieveTokenFunc(conf)
-			opt.Username = username
-			opt.Password = password
+			username, password, err := r.retrieveTokenFunc(conf, env)
+			if username != "" {
+				opt.Username = username
+			}
+			if password == "" {
+				opt.Password = password
+			}
 			if err != nil {
 				fmt.Println("retrieveTokenFunc error:", err.Error())
 			}
@@ -167,7 +160,10 @@ func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisC
 	})
 }
 
-func (r *RedisClientManager) retrieveTokenFunc(conf *redisconfigmanger.RedisConfig) (string, string, error) {
+func (r *RedisClientManager) retrieveTokenFunc(conf *redisconfigmanger.RedisConfig, env string) (string, string, error) {
+	if env == "Dev" {
+		return "", "", nil
+	}
 	ctx := context.Background()
 	client := gcpcloudstorage.GetSingleton().GetClient("dsp_bucket")
 	if client == nil {
