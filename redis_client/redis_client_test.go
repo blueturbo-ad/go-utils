@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/blueturbo-ad/go-utils/environment"
@@ -35,6 +36,33 @@ func TestRedisClientTest(t *testing.T) {
 		ctx := context.Background()
 		res, err := client.Get(ctx, "test").Result()
 		if err != nil {
+			t.Errorf("os.Getwd() = %v; want nil", err)
+		}
+		fmt.Println(res)
+	})
+	t.Run("TestRedisGetWriteClient", func(t *testing.T) {
+		workPath, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		// 去workpath 的上一级目录
+		works := strings.Split(workPath, "/")
+		workPath = strings.Join(works[:len(works)-1], "/")
+
+		cs := workPath + "/config/redis_conf.yaml"
+		err = GetSingleton().UpdateFromFile(cs, "Dev")
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		var e = GetSingleton()
+		client := e.GetWriteClient("event_redis")
+		if client == nil {
+			t.Errorf("os.Getwd() = %v; want nil", client)
+		}
+		ctx := context.Background()
+		res, err := client.Get(ctx, "test").Result()
+		if err != nil {
+			fmt.Println(err.Error())
 			t.Errorf("os.Getwd() = %v; want nil", err)
 		}
 		fmt.Println(res)

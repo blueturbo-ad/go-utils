@@ -8,13 +8,13 @@ Dev:
         pool_size: 20
         timeout: 5000
         nodes:
-          - 10.152.0.106:6379
+          - 10.0.0.215:6391
       read_pool:
         database: 0
         pool_size: 20
         timeout: 5000
         nodes:
-          - 10.152.0.106:6379
+          - 10.0.0.215:6391
 Pro:
   version: 1
   redis_conf:
