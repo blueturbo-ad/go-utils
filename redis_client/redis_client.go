@@ -124,7 +124,7 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 			if username != "" {
 				opt.Username = username
 			}
-			if password == "" {
+			if password != "" {
 				opt.Password = password
 			}
 			if err != nil {
@@ -149,7 +149,7 @@ func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisC
 			if username != "" {
 				opt.Username = username
 			}
-			if password == "" {
+			if password != "" {
 				opt.Password = password
 			}
 			if err != nil {
