@@ -2,6 +2,7 @@ package zap_loggerex
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"log"
+	"path/filepath"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
 	"github.com/blueturbo-ad/go-utils/environment"
@@ -174,12 +176,18 @@ func containsString(slice []string, str string) bool {
 	}
 	return false
 }
+
 func dynamicBuildFilePath(info string) string {
 	now := time.Now().Format("2006-01-02")
 	info = strings.ReplaceAll(info, "{POD_NAME}", environment.GetPodNameInfo())
-	info = strings.ReplaceAll(info, "{POD_NAME}", environment.GetPodNameInfo())
 	info = strings.ReplaceAll(info, "{DATE}", now)
-	info = strings.ReplaceAll(info, "{DATE}", now)
+
+	// 确保目录存在
+	dir := filepath.Dir(info)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		log.Printf("LoggerEx failed to create directory: %v", err)
+	}
+
 	return info
 }
 

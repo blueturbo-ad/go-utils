@@ -3,8 +3,8 @@ Dev:
   version: 1
   zap_loggers:
   - name: "handle_logger_1"
-    info: "./log/handle_logger_info_1.log"
-    error: "./log/handle_logger_err_1.log"
+    info: "./log/{DATE}/handle_logger_info_1.log"
+    error: "./log/{DATE}/handle_logger_err_1.log"
     max_size: 10
     max_backups: 5
     max_age: 30
@@ -14,8 +14,8 @@ Dev:
 
 
   - name: "system_logger"
-    info: "./log/system_logger.log"
-    error: "./log/system_logger_error.log"
+    info: "./log/{DATE}/system_logger.log"
+    error: "./log/{DATE}/system_logger_error.log"
     max_size: 20
     max_backups: 10
     max_age: 60
@@ -24,8 +24,8 @@ Dev:
     async: false
 
   - name: "handle_logger_3"
-    info: "log//handle_logger_info_{POD_NAME}_3.log"
-    error: "log//handle_logger_err_{POD_NAME}_3.log"
+    info: "./log/{DATE}/handle_logger_info_{POD_NAME}_3.log"
+    error: "./log/{DATE}/handle_logger_err_{POD_NAME}_3.log"
     max_size: 15
     max_backups: 7
     max_age: 45
@@ -36,8 +36,8 @@ Pro:
   version: 1
   zap_loggers:
   - name: "handle_logger_1"
-    info: "log//handle_logger_info_{POD_NAME}_1.log"
-    error: "log//handle_logger_err_{POD_NAME}_1.log"
+    info: "./log/{DATE}/handle_logger_info_{POD_NAME}_1.log"
+    error: "./log/{DATE}/handle_logger_err_{POD_NAME}_1.log"
     max_size: 10
     max_backups: 5
     max_age: 30
