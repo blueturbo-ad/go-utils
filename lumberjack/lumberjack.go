@@ -107,10 +107,9 @@ type Logger struct {
 	// using gzip. The default is not to perform compression.
 	Compress bool `json:"compress" yaml:"compress"`
 
-	size     int64
-	file     *os.File
-	mu       sync.Mutex
-	file_num int
+	size int64
+	file *os.File
+	mu   sync.Mutex
 
 	millCh    chan bool
 	startMill sync.Once
@@ -132,6 +131,11 @@ var (
 	megabyte = 1024 * 1024
 )
 
+func (l *Logger) dynamicFileName() {
+	now := time.Now().Format("2006-01-02")
+	l.Filename = strings.ReplaceAll(l.Filename, "{DATE}", now)
+}
+
 // Write implements io.Writer.  If a write would cause the log file to be larger
 // than MaxSize, the file is closed, renamed to include a timestamp of the
 // current time, and a new log file is created using the original log file name.
@@ -139,7 +143,7 @@ var (
 func (l *Logger) Write(p []byte) (n int, err error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-
+	l.dynamicFileName()
 	writeLen := int64(len(p))
 	if writeLen > l.max() {
 		return 0, fmt.Errorf(
@@ -148,30 +152,19 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 	}
 
 	if l.file == nil {
-		fmt.Println("file 对象是空", l.file)
 		if err = l.openExistingOrNew(len(p)); err != nil {
 			return 0, err
 		}
-		l.file_num = 0
 	}
 
 	if l.size+writeLen > l.max() {
-		fmt.Printf("create new file size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
 		if err := l.rotate(); err != nil {
 			return 0, err
 		}
-		l.file_num = 0
-	}
-
-	if l.file_num >= 1500 {
-		fmt.Printf("sync flush log size: %d, writelen:%d, total_len:%d", l.size, writeLen, l.size+writeLen)
-		l.file.Sync()
-		l.file_num = 0
 	}
 
 	n, err = l.file.Write(p)
 	l.size += int64(n)
-	l.file_num++
 
 	return n, err
 }
@@ -220,43 +213,43 @@ func (l *Logger) rotate() error {
 
 // openNew opens a new log file for writing, moving any old log file out of the
 // way.  This methods assumes the file has already been closed.
-// func (l *Logger) openNew() error {
-// 	err := os.MkdirAll(l.dir(), 0755)
-// 	if err != nil {
-// 		return fmt.Errorf("can't make directories for new logfile: %s", err)
-// 	}
+func (l *Logger) openNew() error {
+	err := os.MkdirAll(l.dir(), 0755)
+	if err != nil {
+		return fmt.Errorf("can't make directories for new logfile: %s", err)
+	}
 
-// 	name := l.filename()
-// 	mode := os.FileMode(0600)
-// 	info, err := osStat(name)
-// 	if err == nil {
-// 		// Copy the mode off the old logfile.
-// 		mode = info.Mode()
-// 		// move the existing file
-// 		newname := backupName(name, l.LocalTime)
-// 		if err := os.Rename(name, newname); err != nil {
-// 			return fmt.Errorf("can't rename log file: %s", err)
-// 		}
+	name := l.filename()
+	mode := os.FileMode(0600)
+	info, err := osStat(name)
+	if err == nil {
+		// Copy the mode off the old logfile.
+		mode = info.Mode()
+		// move the existing file
+		newname := backupName(name, l.LocalTime)
+		if err := os.Rename(name, newname); err != nil {
+			return fmt.Errorf("can't rename log file: %s", err)
+		}
 
-// 		// this is a no-op anywhere but linux
-// 		if err := chown(name, info); err != nil {
-// 			return err
-// 		}
-// 		if l.Hook != nil {
-// 			go l.Hook(newname)
-// 		}
-// 	}
-// 	// we use truncate here because this should only get called when we've moved
-// 	// the file ourselves. if someone else creates the file in the meantime,
-// 	// just wipe out the contents.
-// 	f, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode)
-// 	if err != nil {
-// 		return fmt.Errorf("can't open new logfile: %s", err)
-// 	}
-// 	l.file = f
-// 	l.size = 0
-// 	return nil
-// }
+		// this is a no-op anywhere but linux
+		if err := chown(name, info); err != nil {
+			return err
+		}
+		if l.Hook != nil {
+			go l.Hook(newname)
+		}
+	}
+	// we use truncate here because this should only get called when we've moved
+	// the file ourselves. if someone else creates the file in the meantime,
+	// just wipe out the contents.
+	f, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode)
+	if err != nil {
+		return fmt.Errorf("can't open new logfile: %s", err)
+	}
+	l.file = f
+	l.size = 0
+	return nil
+}
 
 // backupName creates a new filename from the given name, inserting a timestamp
 // between the filename and the extension, using the local time if requested
@@ -556,33 +549,3 @@ func (b byFormatTime) Swap(i, j int) {
 func (b byFormatTime) Len() int {
 	return len(b)
 }
-
-func (l *Logger) openNew() error {
-	err := os.MkdirAll(l.dir(), 0755)
-	if err != nil {
-		return fmt.Errorf("can't make directories for new logfile: %s", err)
-	}
-	l.file.Close()
-
-	name := l.filename()
-	// Create a new file with a timestamp in the name
-	name = backupName(name, l.LocalTime)
-	mode := os.FileMode(0600)
-
-	// Open the new file for writing
-	f, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode)
-	if err != nil {
-		return fmt.Errorf("can't open new logfile: %s", err)
-	}
-	if l.Hook != nil {
-		go l.Hook(name)
-	}
-	l.file = f
-	l.size = 0
-	l.file_num = 0
-	return nil
-}
-
-// backupName creates a new filename from the given name, inserting a timestamp
-// between the filename and the extension, using the local time if requested
-// (otherwise UTC).

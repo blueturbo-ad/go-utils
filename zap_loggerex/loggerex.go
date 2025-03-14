@@ -14,7 +14,7 @@ import (
 	"github.com/blueturbo-ad/go-utils/config_manage"
 	"github.com/blueturbo-ad/go-utils/environment"
 
-	"github.com/VarusHsu/lumberjack"
+	"github.com/blueturbo-ad/go-utils/lumberjack"
 	// "github.com/blueturbo-ad/go-utils/lumberjack"
 )
 
@@ -174,12 +174,8 @@ func containsString(slice []string, str string) bool {
 	}
 	return false
 }
-func dynamicBuildFilePath(info string) string {
-	now := time.Now().Format("2006-01-02")
+func builFilePath(info string) string {
 	info = strings.ReplaceAll(info, "{POD_NAME}", environment.GetPodNameInfo())
-	info = strings.ReplaceAll(info, "{POD_NAME}", environment.GetPodNameInfo())
-	info = strings.ReplaceAll(info, "{DATE}", now)
-	info = strings.ReplaceAll(info, "{DATE}", now)
 	return info
 }
 
@@ -197,7 +193,7 @@ func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.Wr
 	var hookFunc func(string) = nil
 
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   dynamicBuildFilePath(info),
+		Filename:   builFilePath(info),
 		MaxSize:    conf.MaxSize,
 		MaxBackups: conf.MaxBackups,
 		MaxAge:     conf.MaxAge,
