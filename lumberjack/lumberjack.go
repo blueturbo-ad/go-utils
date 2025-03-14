@@ -32,6 +32,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
 	"time"
 )
 
@@ -82,6 +83,8 @@ type Logger struct {
 	// os.TempDir() if empty.
 	Filename string `json:"filename" yaml:"filename"`
 
+	FileDatename string `json:"filedatename" yaml:"filedatename"`
+
 	// MaxSize is the maximum size in megabytes of the log file before it gets
 	// rotated. It defaults to 100 megabytes.
 	MaxSize int `json:"maxsize" yaml:"maxsize"`
@@ -131,19 +134,18 @@ var (
 	megabyte = 1024 * 1024
 )
 
-func (l *Logger) dynamicFileName() {
-	now := time.Now().Format("2006-01-02")
-	l.Filename = strings.ReplaceAll(l.Filename, "{DATE}", now)
-}
-
 // Write implements io.Writer.  If a write would cause the log file to be larger
 // than MaxSize, the file is closed, renamed to include a timestamp of the
 // current time, and a new log file is created using the original log file name.
 // If the length of the write is greater than MaxSize, an error is returned.
 func (l *Logger) Write(p []byte) (n int, err error) {
+
+	LoggerDateManager := GetInstance()
+	l.Filename = LoggerDateManager.GetLogDateInfo(l.FileDatename)
+
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.dynamicFileName()
+
 	writeLen := int64(len(p))
 	if writeLen > l.max() {
 		return 0, fmt.Errorf(

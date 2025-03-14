@@ -770,3 +770,23 @@ func exists(path string, t testing.TB) {
 	_, err := os.Stat(path)
 	assertUp(err == nil, t, 1, "expected file to exist, but got error from os.Stat: %v", err)
 }
+
+// 帮我写一个 bantchmark
+func TestUpdateLogDateInfo(t *testing.T) {
+
+	// 初始化 LoggerDateManager 实例
+	loggerDateManager := GetInstance()
+
+	// 设置测试参数
+	filepath := "test.log"
+	loggerDateManager.UpdateLogDateInfo(filepath)
+
+	// 重置计时器
+	//b.ResetTimer()
+
+	// for i := 0; i < b.N; i++ {
+	// 	// 模拟日志写入操作
+	// 	loggerDateManager.UpdateLogDateInfo(filepath)
+	// }
+
+}
