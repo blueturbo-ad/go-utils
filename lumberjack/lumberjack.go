@@ -153,7 +153,7 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 		)
 	}
 
-	if l.file == nil {
+	if l.file == nil || l.Filename != l.file.Name() {
 		if err = l.openExistingOrNew(len(p)); err != nil {
 			return 0, err
 		}

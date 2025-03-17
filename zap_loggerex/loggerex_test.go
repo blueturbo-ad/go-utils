@@ -47,6 +47,14 @@ func TestGetLogger(t *testing.T) {
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
 		}
+		for i := 0; i < 10; i++ {
+			logger.Info("handle_logger_1", "2222")
+			time.Sleep(1 * time.Second)
+			logger.Info("handle_logger_1", "3333")
+			time.Sleep(1 * time.Second)
+			logger.Info("handle_logger_1", "4444")
+			time.Sleep(1 * time.Second)
+		}
 
 		logger.Info("handle_logger_1", "2222")
 		logger.Warn("handle_logger_1", "3333")
