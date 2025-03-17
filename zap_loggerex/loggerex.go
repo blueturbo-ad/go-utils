@@ -192,13 +192,19 @@ func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.Wr
 	}
 	var hookFunc func(string) = nil
 
+	filepath := builFilePath(info)
+
+	LoggerDateManager := lumberjack.GetInstance()
+	LoggerDateManager.UpdateLogDateInfo(filepath)
+
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   builFilePath(info),
-		MaxSize:    conf.MaxSize,
-		MaxBackups: conf.MaxBackups,
-		MaxAge:     conf.MaxAge,
-		Compress:   conf.Compress,
-		Hook:       hookFunc,
+		FileDatename: filepath,
+		Filename:     filepath,
+		MaxSize:      conf.MaxSize,
+		MaxBackups:   conf.MaxBackups,
+		MaxAge:       conf.MaxAge,
+		Compress:     conf.Compress,
+		Hook:         hookFunc,
 	}
 
 	if conf.Async {
