@@ -3,6 +3,7 @@ package kafkaclient
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 
@@ -19,7 +20,13 @@ func TestKafkaClient(t *testing.T) {
 	os.Setenv("POD_NAMESPACE", "dsp-ns")
 	environment.Init()
 	k8sclient.GetSingleton().SetUp()
-	GetSingleton().UpdateLoadK8sConfigMap("kafka-config", "Pro")
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	p := dir + "/config/kafka_config.yaml"
+	// GetSingleton().UpdateLoadK8sConfigMap("kafka-config", "Pro")
+	GetSingleton().UpdateFromFile(p, "Pro")
 	t.Run("kafka client producer", func(t *testing.T) {
 		p, err := GetSingleton().GetProducerClient("win_kafka")
 		if err != nil {
