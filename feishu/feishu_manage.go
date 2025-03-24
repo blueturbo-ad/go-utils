@@ -130,11 +130,17 @@ func (l *FeishuManage) UpdateLogger(config *config_manage.FeishuConfig) error {
 func (l *FeishuManage) GetConfig() *config_manage.FeishuConfig {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
+	if l.index > len(l.Config) {
+		return nil
+	}
 	return l.Config[l.index]
 }
 
 func (l *FeishuManage) Send(errType, message string) error {
 	conf := l.GetConfig()
+	if conf == nil {
+		return fmt.Errorf("feishu config is nil")
+	}
 	messageData := l.BuildFeishuCare(errType, message)
 
 	msg, err := json.Marshal(messageData)

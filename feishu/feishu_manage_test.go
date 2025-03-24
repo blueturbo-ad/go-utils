@@ -70,7 +70,7 @@ func TestFeishuManage(t *testing.T) {
 
 	})
 	t.Run("TestFeishuConfigMap", func(t *testing.T) {
-		logger := GetInstance()
-		logger.UpdateLoadK8sConfigMap("feishu", "Pro")
+		feishu := GetInstance()
+		feishu.UpdateLoadK8sConfigMap("feishu", "Pro")
 	})
 }
