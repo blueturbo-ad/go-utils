@@ -130,7 +130,7 @@ func (l *FeishuManage) UpdateLogger(config *config_manage.FeishuConfig) error {
 func (l *FeishuManage) GetConfig() *config_manage.FeishuConfig {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
-	if l.index > len(l.Config) {
+	if l.index > len(l.Config) || l.index < 0 {
 		return nil
 	}
 	return l.Config[l.index]
