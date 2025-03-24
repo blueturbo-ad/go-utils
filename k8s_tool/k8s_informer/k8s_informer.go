@@ -71,23 +71,23 @@ func (i *Informer) Run() {
 	informer := (*i.Informer)
 	// 添加事件处理程序
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		// AddFunc: func(obj interface{}) {
-		// configMap := obj.(*corev1.ConfigMap)
-		// env := environment.GetSingleton().GetEnv()
-		// loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
-		// if initFunc, exists := i.cacheInitFuns[configMap.Name]; exists {
-		// 	if err := initFunc(configMap.Name, env); err != nil {
-		// 		msg := fmt.Sprintf("add config map error: %s", err.Error())
-		// 		loggerex.GetSingleton().Error("system_logger", "%s", msg)
-		// 		i.StartErrChan <- fmt.Errorf("%s", msg)
-		// 	} else {
-		// 		i.cacheFunc[configMap.Name] = true
-		// 	}
-		// } else {
-		// 	msg := fmt.Sprintf("No init function found for config map: %s", configMap.Name)
-		// 	loggerex.GetSingleton().Warn("system_logger", "%s", msg)
-		// }
-		// },
+		AddFunc: func(obj interface{}) {
+			// configMap := obj.(*corev1.ConfigMap)
+			// env := environment.GetSingleton().GetEnv()
+			// loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
+			// if initFunc, exists := i.cacheInitFuns[configMap.Name]; exists {
+			// 	if err := initFunc(configMap.Name, env); err != nil {
+			// 		msg := fmt.Sprintf("add config map error: %s", err.Error())
+			// 		loggerex.GetSingleton().Error("system_logger", "%s", msg)
+			// 		i.StartErrChan <- fmt.Errorf("%s", msg)
+			// 	} else {
+			// 		i.cacheFunc[configMap.Name] = true
+			// 	}
+			// } else {
+			// 	msg := fmt.Sprintf("No init function found for config map: %s", configMap.Name)
+			// 	loggerex.GetSingleton().Warn("system_logger", "%s", msg)
+			// }
+		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			oldConfigMap := oldObj.(*corev1.ConfigMap)
