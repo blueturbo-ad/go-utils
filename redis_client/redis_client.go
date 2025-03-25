@@ -120,16 +120,6 @@ func (r *RedisClientManager) BuildWriteRedisClient(conf *redisconfigmanger.Redis
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
 		NewClient: func(opt *redis.Options) *redis.Client {
-			username, password, err := r.retrieveTokenFunc(conf, env)
-			if username != "" {
-				opt.Username = username
-			}
-			if password != "" {
-				opt.Password = password
-			}
-			if err != nil {
-				fmt.Println("retrieveTokenFunc error:", err.Error())
-			}
 			return redis.NewClient(opt)
 		},
 	})
@@ -145,16 +135,6 @@ func (r *RedisClientManager) BuildReadRedisClient(conf *redisconfigmanger.RedisC
 		MaxIdleConns:    10,
 		ConnMaxIdleTime: 30 * time.Second,
 		NewClient: func(opt *redis.Options) *redis.Client {
-			username, password, err := r.retrieveTokenFunc(conf, env)
-			if username != "" {
-				opt.Username = username
-			}
-			if password != "" {
-				opt.Password = password
-			}
-			if err != nil {
-				fmt.Println("retrieveTokenFunc error:", err.Error())
-			}
 			return redis.NewClient(opt)
 		},
 	})
