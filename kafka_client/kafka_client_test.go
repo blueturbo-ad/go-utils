@@ -82,7 +82,7 @@ func TestKafkaClient(t *testing.T) {
 		time.Sleep(1 * time.Second)
 	})
 	t.Run("kafka client consumer", func(t *testing.T) {
-		c, err := GetSingleton().GetConsumerClient("win_kafka")
+		c, err := GetSingleton().GetConsumerClient("win_kafka", "test")
 		if err != nil {
 			t.Errorf("GetConsumerClient() = %v; want nil", err)
 		}
