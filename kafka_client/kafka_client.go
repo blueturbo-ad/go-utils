@@ -46,12 +46,12 @@ func (k *KafkaClientManager) GetProducerClient(name string) (*kafka.Producer, er
 	return nil, fmt.Errorf("kafka client  GetProducerClient is error")
 }
 
-func (k *KafkaClientManager) GetConsumerClient(name string) (*kafka.Consumer, error) {
+func (k *KafkaClientManager) GetConsumerClient(name string, group string) (*kafka.Consumer, error) {
 	k.rwMutex.RLock()
 	defer k.rwMutex.RUnlock()
 	if k.Config[k.index][name] != nil {
 		config := k.Config[k.index][name]
-		return k.buildConsumer(config)
+		return k.buildConsumer(config, group)
 	}
 	return nil, fmt.Errorf("kafka client  GetConsumerClient is error")
 }
@@ -127,11 +127,11 @@ func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*ka
 
 }
 
-func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig) (*kafka.Consumer, error) {
+func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig, group string) (*kafka.Consumer, error) {
 	// 创建消费者配置
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": conf.Customer.Broker,
-		"group.id":          conf.Customer.Group,
+		"group.id":          group,
 		"auto.offset.reset": conf.Customer.Reset,
 		"security.protocol": conf.Customer.Protocol,
 		"sasl.mechanism":    conf.Customer.Mechanism,
