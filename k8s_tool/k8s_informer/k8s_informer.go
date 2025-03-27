@@ -1,6 +1,8 @@
 package k8s_informer
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -99,33 +101,33 @@ func (i *Informer) Run() {
 
 	go informer.Run(stopCh)
 
-	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	// 等待缓存同步
-	// go func() {
-	// 	for {
-	// 		if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
-	// 			i.StartErrChan <- errors.New("缓存同步失败")
-	// 		}
-	// 		select {
-	// 		case <-ctx.Done():
-	// 			fmt.Println("cache sync done")
-	// 			if err := i.CheckIsRun(); err != nil {
-	// 				fmt.Println("cache sync done error", err.Error())
-	// 				i.StartErrChan <- err
-	// 				return
-	// 			}
-	// 			return
-	// 		default:
-	// 			if err := i.CheckIsRun(); err == nil {
-	// 				i.Ssucchan <- true
-	// 				return
-	// 			}
-	// 			time.Sleep(100 * time.Millisecond)
-	// 		}
-	// 	}
-	// }()
+	go func() {
+		for {
+			if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
+				i.StartErrChan <- errors.New("缓存同步失败")
+			}
+			select {
+			case <-ctx.Done():
+				fmt.Println("cache sync done")
+				if err := i.CheckIsRun(); err != nil {
+					fmt.Println("cache sync done error", err.Error())
+					i.StartErrChan <- err
+					return
+				}
+				return
+			default:
+				if err := i.CheckIsRun(); err == nil {
+					i.Ssucchan <- true
+					return
+				}
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+	}()
 	// 等待信号以退出程序
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
