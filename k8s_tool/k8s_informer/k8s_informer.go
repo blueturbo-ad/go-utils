@@ -1,8 +1,6 @@
 package k8s_informer
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -71,23 +69,6 @@ func (i *Informer) Run() {
 	informer := (*i.Informer)
 	// 添加事件处理程序
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			// configMap := obj.(*corev1.ConfigMap)
-			// env := environment.GetSingleton().GetEnv()
-			// loggerex.GetSingleton().Info("system_logger", "add config map: %s", configMap.Name)
-			// if initFunc, exists := i.cacheInitFuns[configMap.Name]; exists {
-			// 	if err := initFunc(configMap.Name, env); err != nil {
-			// 		msg := fmt.Sprintf("add config map error: %s", err.Error())
-			// 		loggerex.GetSingleton().Error("system_logger", "%s", msg)
-			// 		i.StartErrChan <- fmt.Errorf("%s", msg)
-			// 	} else {
-			// 		i.cacheFunc[configMap.Name] = true
-			// 	}
-			// } else {
-			// 	msg := fmt.Sprintf("No init function found for config map: %s", configMap.Name)
-			// 	loggerex.GetSingleton().Warn("system_logger", "%s", msg)
-			// }
-		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newConfigMap := newObj.(*corev1.ConfigMap)
 			oldConfigMap := oldObj.(*corev1.ConfigMap)
@@ -118,32 +99,33 @@ func (i *Informer) Run() {
 
 	go informer.Run(stopCh)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// defer cancel()
 
 	// 等待缓存同步
-	go func() {
-		for {
-			if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
-				i.StartErrChan <- errors.New("缓存同步失败")
-			}
-			select {
-			case <-ctx.Done():
-				fmt.Println("cache sync done")
-				if err := i.CheckIsRun(); err != nil {
-					i.StartErrChan <- err
-					return
-				}
-				return
-			default:
-				if err := i.CheckIsRun(); err == nil {
-					i.Ssucchan <- true
-					return
-				}
-				time.Sleep(100 * time.Millisecond)
-			}
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
+	// 			i.StartErrChan <- errors.New("缓存同步失败")
+	// 		}
+	// 		select {
+	// 		case <-ctx.Done():
+	// 			fmt.Println("cache sync done")
+	// 			if err := i.CheckIsRun(); err != nil {
+	// 				fmt.Println("cache sync done error", err.Error())
+	// 				i.StartErrChan <- err
+	// 				return
+	// 			}
+	// 			return
+	// 		default:
+	// 			if err := i.CheckIsRun(); err == nil {
+	// 				i.Ssucchan <- true
+	// 				return
+	// 			}
+	// 			time.Sleep(100 * time.Millisecond)
+	// 		}
+	// 	}
+	// }()
 	// 等待信号以退出程序
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
