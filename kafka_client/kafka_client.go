@@ -110,15 +110,19 @@ func (k *KafkaClientManager) buildKafkaClient(e *config_manage.KafkaConfigManage
 }
 func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*kafka.Producer, error) {
 	// 创建生产者配置
-	p, err := kafka.NewProducer(&kafka.ConfigMap{
+	config := &kafka.ConfigMap{
 		"bootstrap.servers": conf.Producer.Broker,
 		"client.id":         conf.Producer.Producer,
 		"acks":              "all",
-		"security.protocol": conf.Producer.Protocol,
-		"sasl.mechanism":    conf.Producer.Mechanism,
-		"sasl.username":     conf.Producer.Username,
-		"sasl.password":     conf.Producer.Password,
-	})
+	}
+	if conf.Producer.Username != EmptyString && conf.Producer.Password != EmptyString {
+		config.SetKey("sasl.username", conf.Producer.Username)
+		config.SetKey("sasl.password", conf.Producer.Password)
+		config.SetKey("security.protocol", conf.Producer.Protocol)
+		config.SetKey("sasl.mechanism", conf.Producer.Mechanism)
+	}
+
+	p, err := kafka.NewProducer(config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create producer: %s", err)
 	}
@@ -129,15 +133,19 @@ func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*ka
 
 func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig, group string) (*kafka.Consumer, error) {
 	// 创建消费者配置
-	c, err := kafka.NewConsumer(&kafka.ConfigMap{
+	config := &kafka.ConfigMap{
 		"bootstrap.servers": conf.Customer.Broker,
 		"group.id":          group,
 		"auto.offset.reset": conf.Customer.Reset,
-		"security.protocol": conf.Customer.Protocol,
-		"sasl.mechanism":    conf.Customer.Mechanism,
-		"sasl.username":     conf.Customer.Username,
-		"sasl.password":     conf.Customer.Password,
-	})
+	}
+	if conf.Customer.Username != EmptyString && conf.Customer.Password != EmptyString {
+		config.SetKey("sasl.username", conf.Producer.Username)
+		config.SetKey("sasl.password", conf.Producer.Password)
+		config.SetKey("security.protocol", conf.Producer.Protocol)
+		config.SetKey("sasl.mechanism", conf.Producer.Mechanism)
+	}
+
+	c, err := kafka.NewConsumer(config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create consumer: %s", err)
 	}
