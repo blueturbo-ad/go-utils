@@ -134,9 +134,10 @@ func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*ka
 func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig, group string) (*kafka.Consumer, error) {
 	// 创建消费者配置
 	config := &kafka.ConfigMap{
-		"bootstrap.servers": conf.Customer.Broker,
-		"group.id":          group,
-		"auto.offset.reset": conf.Customer.Reset,
+		"bootstrap.servers":  conf.Customer.Broker,
+		"group.id":           group,
+		"auto.offset.reset":  conf.Customer.Reset,
+		"enable.auto.commit": conf.Customer.AutoCommit,
 	}
 	if conf.Customer.Username != EmptyString && conf.Customer.Password != EmptyString {
 		config.SetKey("sasl.username", conf.Producer.Username)

@@ -66,13 +66,14 @@ type KafkaConfig struct {
 		Mechanism string `yaml:"mechanism"`
 	} `yaml:"producer"`
 	Customer struct {
-		Broker    string `yaml:"broker"`
-		Group     string `yaml:"group"`
-		Username  string `yaml:"username"`
-		Password  string `yaml:"password"`
-		Protocol  string `yaml:"protocol"`
-		Mechanism string `yaml:"mechanism"`
-		Reset     string `yaml:"reset"`
+		Broker     string `yaml:"broker"`
+		Group      string `yaml:"group"`
+		Username   string `yaml:"username"`
+		Password   string `yaml:"password"`
+		Protocol   string `yaml:"protocol"`
+		Mechanism  string `yaml:"mechanism"`
+		Reset      string `yaml:"reset"`
+		AutoCommit bool   `yaml:"auto_commit"`
 	} `yaml:"customer"`
 }
 
