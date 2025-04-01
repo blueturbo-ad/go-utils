@@ -140,10 +140,10 @@ func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig, grou
 		"enable.auto.commit": conf.Customer.AutoCommit,
 	}
 	if conf.Customer.Username != EmptyString && conf.Customer.Password != EmptyString {
-		config.SetKey("sasl.username", conf.Producer.Username)
-		config.SetKey("sasl.password", conf.Producer.Password)
-		config.SetKey("security.protocol", conf.Producer.Protocol)
-		config.SetKey("sasl.mechanism", conf.Producer.Mechanism)
+		config.SetKey("sasl.username", conf.Customer.Username)
+		config.SetKey("sasl.password", conf.Customer.Password)
+		config.SetKey("security.protocol", conf.Customer.Protocol)
+		config.SetKey("sasl.mechanism", conf.Customer.Mechanism)
 	}
 
 	c, err := kafka.NewConsumer(config)
