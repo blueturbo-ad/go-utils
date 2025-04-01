@@ -1,0 +1,19 @@
+curused: "Dev"
+Dev:
+  version: 1
+  conf:
+    - name: "billing_model"
+      adxs:
+        - inmobi
+    - name: "imp_model"
+      adxs:
+        - Algorix
+Pro:
+  version: 1
+  conf:
+    - name: "billing_model"
+      adxs:
+        - inmobi
+    - name: "imp_model"
+      adxs:
+        - Algorix
