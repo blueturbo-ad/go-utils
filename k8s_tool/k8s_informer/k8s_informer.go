@@ -51,6 +51,7 @@ func (i *Informer) SetUp() error {
 	i.cacheInitFuns = make(map[string]func(configMapName, env string) error)
 	i.k8sClient = k8sclient.GetSingleton().GetClient()
 	namespace := environment.GetSingleton().GetNamespace()
+	fmt.Println("namespace: ", namespace)
 	factory := informers.NewSharedInformerFactoryWithOptions(i.k8sClient, 60*time.Minute, informers.WithNamespace(namespace))
 	// 创建 ConfigMap Informer
 	informer := factory.Core().V1().ConfigMaps().Informer()
