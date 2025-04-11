@@ -13,8 +13,8 @@ type MisBudgetTopicConfig struct {
 }
 
 type MisBudgetTopicConfigManager struct {
-	Config  *[]RedisConfig `yaml:"redis_conf"`
-	Version string         `yaml:"version"`
+	Config  *[]MisBudgetTopicConfig `yaml:"conf"`
+	Version string                  `yaml:"version"`
 }
 
 func (r *MisBudgetTopicConfigManager) LoadK8sConfigMap(configMapName, env string) error {

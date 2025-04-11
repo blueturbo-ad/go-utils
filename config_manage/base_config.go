@@ -44,8 +44,17 @@ func (c *ManagerConfig) LoadK8sConfigMap(namespace, configMapName, env string) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to get configmap: %v", err)
 	}
-	conf, ok := configMap.Data[configMapName]
-	if !ok {
+	// val := configMap.Data
+	// conf, ok := configMap.Data[configMapName]
+	// if !ok {
+	// 	return nil, fmt.Errorf("configmap %s not found", configMapName)
+	// }
+	var conf string
+	for _, v := range configMap.Data {
+		conf = v
+		break
+	}
+	if conf == "" {
 		return nil, fmt.Errorf("configmap %s not found", configMapName)
 	}
 

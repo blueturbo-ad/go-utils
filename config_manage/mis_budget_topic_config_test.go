@@ -14,7 +14,7 @@ func TestMisBudgetTopicConfig(t *testing.T) {
 	environment.Init()
 	k8sclient.GetSingleton().SetUp()
 	t.Run("TestMisBudgetTopicConfig", func(t *testing.T) {
-		var e = new(GcpSvcAccountTokenConfig)
+		var e = new(MisBudgetTopicConfigManager)
 		err := e.LoadK8sConfigMap("mis-to-budget-kafka-topic", "Dev")
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
