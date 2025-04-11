@@ -40,6 +40,15 @@ func (m *MisBudgetTopicManager) UpdateLoadK8sConfigMap(configMapName, env string
 	return m.refreshConfig(e, env)
 }
 
+func (m *MisBudgetTopicManager) UpdateLoadFileConfig(filePath, env string) error {
+	var e = new(config_manage.MisBudgetTopicConfigManager)
+	err := e.LoadConfig(filePath, env)
+	if err != nil {
+		return fmt.Errorf("redis client  LoadK8sConfigMap is error %s", err.Error())
+	}
+	return m.refreshConfig(e, env)
+}
+
 func (m *MisBudgetTopicManager) refreshConfig(e *config_manage.MisBudgetTopicConfigManager, env string) error {
 	m.Config = make(map[string]*config_manage.MisBudgetTopicConfig)
 	for _, v := range *e.Config {
