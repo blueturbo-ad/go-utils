@@ -27,8 +27,13 @@ func GetSingleton() *MisBudgetTopicManager {
 }
 
 func (m *MisBudgetTopicManager) GetConfig(name string) *config_manage.MisBudgetTopicConfig {
-	m.Config[name].Name = name
-	return m.Config[name]
+
+	if config, ok := m.Config[name]; ok {
+		if config != nil {
+			return config
+		}
+	}
+	return nil
 }
 
 func (m *MisBudgetTopicManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
