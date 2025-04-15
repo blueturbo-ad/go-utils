@@ -15,7 +15,7 @@ func TestPrometheus(t *testing.T) {
 			Help:        "test",
 			ConstLabels: map[string]string{"test": "test"},
 		})
-		val := flag.Int64("	test", 0, "test")
+		val := flag.Int64("	test", 1, "test")
 		a.SetVal(val)
 
 	})
