@@ -46,10 +46,13 @@ func (p *PrometheusTool) NewPrometheusGauge(option *prometheus.GaugeOpts, name s
 	if name == "" {
 		name = option.Name
 	}
-	c := prometheus.NewGauge(*option)
+
 	if _, ok := p.c[name]; ok {
 		return p
+	} else {
+		c := prometheus.NewGauge(*option)
+		p.c[name] = c
 	}
-	p.c[name] = c
+
 	return p
 }
