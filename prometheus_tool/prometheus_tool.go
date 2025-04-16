@@ -1,6 +1,7 @@
 package prometheustool
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -29,30 +30,30 @@ func GetSingleton() *PrometheusTool {
 	return instance
 }
 
-func (p *PrometheusTool) GetPrometheusGauge(name string) prometheus.Gauge {
+func (p *PrometheusTool) GetPrometheusGauge(name string) (prometheus.Gauge, error) {
 	if name == "" {
-		return nil
+		return nil, fmt.Errorf("name is empty")
 	}
 	if c, ok := p.c[name]; ok {
-		return c
+		return c, nil
 	}
-	return nil
+	return nil, fmt.Errorf("prometheus gauge not found")
 }
 
-func (p *PrometheusTool) NewPrometheusGauge(option *prometheus.GaugeOpts, name string) *PrometheusTool {
+func (p *PrometheusTool) NewPrometheusGauge(option *prometheus.GaugeOpts, name string) (*PrometheusTool, error) {
 	if option == nil {
-		return nil
+		return nil, fmt.Errorf("option is nil")
 	}
 	if name == "" {
 		name = option.Name
 	}
 
 	if _, ok := p.c[name]; ok {
-		return p
+		return p, nil
 	} else {
 		c := prometheus.NewGauge(*option)
 		p.c[name] = c
 	}
 
-	return p
+	return p, nil
 }
