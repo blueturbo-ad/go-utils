@@ -53,10 +53,11 @@ func (p *PrometheusTool) NewPrometheusGauge(option *prometheus.GaugeOpts, name s
 	} else {
 		reigster := prometheus.NewRegistry()
 		c := prometheus.NewGauge(*option)
-		p.c[name] = c
 		if err := reigster.Register(c); err != nil {
 			return nil, fmt.Errorf("register prometheus gauge failed: %v", err)
 		}
+		p.c[name] = c
+
 	}
 
 	return p, nil
