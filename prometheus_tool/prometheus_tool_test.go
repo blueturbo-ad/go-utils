@@ -22,7 +22,7 @@ func TestPrometheus(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error getting Prometheus gauge: %v", err)
 		}
-		c.Set(1)
+		c.(prometheus.Gauge).Set(1)
 
 	})
 
