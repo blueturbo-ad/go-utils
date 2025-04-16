@@ -32,7 +32,7 @@ func GetSingleton() *PrometheusTool {
 	return instance
 }
 
-func (p *PrometheusTool) GetPrometheusGauge(name string) (any, error) {
+func (p *PrometheusTool) GetPrometheus(name string) (any, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name is empty")
 	}
