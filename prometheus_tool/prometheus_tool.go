@@ -18,13 +18,15 @@ var (
 )
 
 type PrometheusTool struct {
-	c map[string]prometheus.Gauge
+	c        map[string]prometheus.Gauge
+	reigster *prometheus.Registry
 }
 
 func GetSingleton() *PrometheusTool {
 	once.Do(func() {
 		instance = &PrometheusTool{
-			c: make(map[string]prometheus.Gauge),
+			c:        make(map[string]prometheus.Gauge),
+			reigster: prometheus.NewRegistry(),
 		}
 	})
 	return instance
@@ -51,14 +53,15 @@ func (p *PrometheusTool) NewPrometheusGauge(option *prometheus.GaugeOpts, name s
 	if _, ok := p.c[name]; ok {
 		return p, nil
 	} else {
-		reigster := prometheus.NewRegistry()
 		c := prometheus.NewGauge(*option)
-		if err := reigster.Register(c); err != nil {
-			return nil, fmt.Errorf("register prometheus gauge failed: %v", err)
-		}
+		p.reigster.MustRegister(c)
 		p.c[name] = c
 
 	}
 
 	return p, nil
+}
+
+func (P PrometheusTool) GetPrometheusRegister() *prometheus.Registry {
+	return P.reigster
 }
