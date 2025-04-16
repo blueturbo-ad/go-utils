@@ -77,8 +77,8 @@ func (i *Informer) Run() {
 			oldConfigMap := oldObj.(*corev1.ConfigMap)
 			env := environment.GetSingleton().GetEnv()
 			loggerex.GetSingleton().Info("system_logger", "update config map: %s \n", newConfigMap.Name)
-			fmt.Println("update config map: ", newConfigMap.Name)
 			if initFunc, exists := i.cacheInitFuns[newConfigMap.Name]; exists {
+				fmt.Println("update config map: ", newConfigMap.Name)
 				if IsConfigMapEqual(oldConfigMap, newConfigMap) {
 					return
 				}
