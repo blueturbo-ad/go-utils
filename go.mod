@@ -1,8 +1,11 @@
 module github.com/blueturbo-ad/go-utils
 
-go 1.23.4
+go 1.24.1
+
+toolchain go1.24.3
 
 require (
+	github.com/blueturbo-ad/dsp_data_interface v0.6.27
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/micro/go-micro/v2 v2.9.1
 	github.com/prometheus/client_golang v1.11.1
@@ -44,7 +47,7 @@ require (
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -106,5 +109,5 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/grpc v1.70.0 // indirect
-	google.golang.org/protobuf v1.36.4 // indirect
+	google.golang.org/protobuf v1.36.6
 )
