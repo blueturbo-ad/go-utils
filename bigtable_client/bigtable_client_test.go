@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"cloud.google.com/go/bigtable"
@@ -46,14 +48,22 @@ func TestBigtableclient(t *testing.T) {
 	t.Run("test bigtable read", func(t *testing.T) {
 		ctx := context.Background()
 		cliobj := GetSingleton()
-		if err := cliobj.UpdateLoadK8sConfigMap("bigtable", "Dev"); err != nil {
-			t.Errorf("GetSingleton() = %v; want nil", err)
+		// if err := cliobj.UpdateLoadK8sConfigMap("bigtable", "Pro"); err != nil {
+		// 	t.Errorf("GetSingleton() = %v; want nil", err)
+		// }
+		workPath := environment.GetWorkPath()
+		env_path := strings.ToLower(environment.GetEnv())
+		configPath := filepath.Join(workPath, "config", env_path, "bigtable.yaml")
+		env := environment.GetEnv()
+		if err := cliobj.UpdateFromFile(configPath, env); err != nil {
+			fmt.Println("UpdateFromFile error:", err.Error())
+			return
 		}
 		client := cliobj.GetClient()
-		tb1 := client.Open("test-02")
+		tb1 := client.Open("adLibrary")
 
 		// 插入一条数据
-		rowKey := "row-key-1"
+		rowKey := "Creative::538"
 		err := tb1.ReadRows(ctx, bigtable.PrefixRange(rowKey), func(row bigtable.Row) bool {
 			for _, ris := range row {
 				for _, ri := range ris {

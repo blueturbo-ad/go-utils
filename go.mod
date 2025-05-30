@@ -5,7 +5,7 @@ go 1.24.1
 toolchain go1.24.3
 
 require (
-	github.com/blueturbo-ad/dsp_data_interface v0.6.27
+	github.com/blueturbo-ad/dsp_data_interface v0.6.33
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/micro/go-micro/v2 v2.9.1
 	github.com/prometheus/client_golang v1.11.1

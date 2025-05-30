@@ -34,7 +34,7 @@ func TestKafkaClient(t *testing.T) {
 			t.Errorf("GetProducerClient() = %v; want nil", err)
 		}
 		kmsg := &KafkaMsg{
-			Msg: "test",
+			Msg: "{'msg_type': 6, 'strategy_id': 554, 'strategy_data': 'CKoEEL0CGgtrYWZrYea1i+ivlSCAiXoogIl6Ohz///8H////B////wf///8H////B////wf///8HQgNBTELoAQHwAcCEPQ=='}",
 		}
 
 		msgbyte, err := json.Marshal(kmsg)
@@ -42,7 +42,7 @@ func TestKafkaClient(t *testing.T) {
 			fmt.Printf("failed to marshal message: %s\n", err)
 			return
 		}
-		topic := "test_topic_mis_creative_event"
+		topic := "topic-sg-mis-bid_server-ad_library"
 		err = p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 			Value:          msgbyte,
@@ -86,7 +86,7 @@ func TestKafkaClient(t *testing.T) {
 		if err != nil {
 			t.Errorf("GetConsumerClient() = %v; want nil", err)
 		}
-		topic := "test_event_win"
+		topic := "topic-sg-mis-event_server-budget_pacing"
 		err = c.Subscribe(topic, nil)
 		if err != nil {
 			fmt.Printf("failed to subscribe topic: %s\n", err)
@@ -97,7 +97,8 @@ func TestKafkaClient(t *testing.T) {
 				msg, err := c.ReadMessage(-1)
 				if err == nil {
 					fmt.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
-					c.CommitMessage(msg)
+					// c.CommitMessage(msg)
+
 				} else {
 					fmt.Printf("Consumer error: %v (%v)\n", err, msg)
 				}

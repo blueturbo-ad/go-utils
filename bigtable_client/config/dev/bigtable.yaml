@@ -1,0 +1,7 @@
+curused: "Dev"
+Dev:
+  project_id: "blueturbo"
+  instance_id: "bigtable-blueturbo-dsp"
+Pro:
+  project_id: "blueturbo"
+  instance_id: "bigtable-blueturbo-dsp"

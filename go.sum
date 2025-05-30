@@ -92,6 +92,10 @@ github.com/bitly/go-simplejson v0.5.0/go.mod h1:cXHtHw4XUPsvGaxgjIAn8PhEWG9NfngE
 github.com/blang/semver v3.1.0+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/blueturbo-ad/dsp_data_interface v0.6.27 h1:nILpxUUptAppIfU7MRl3bIP59WUO7mOr51IviDoSsMw=
 github.com/blueturbo-ad/dsp_data_interface v0.6.27/go.mod h1:4UPJTViLLuS7Z942VvXDmYG+tTdaUa04zDuy45SkryI=
+github.com/blueturbo-ad/dsp_data_interface v0.6.28 h1:5fO7jb4Wthe7+F6oAQz1HlkomuZChcdABuQ6ZxP3r8w=
+github.com/blueturbo-ad/dsp_data_interface v0.6.28/go.mod h1:4UPJTViLLuS7Z942VvXDmYG+tTdaUa04zDuy45SkryI=
+github.com/blueturbo-ad/dsp_data_interface v0.6.33 h1:rng7jQeXkP3tj14xVNWf2QKGmpGCxGfUjPfAxADuLkE=
+github.com/blueturbo-ad/dsp_data_interface v0.6.33/go.mod h1:4UPJTViLLuS7Z942VvXDmYG+tTdaUa04zDuy45SkryI=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dRnpXw/yCqJaO+ZrUyxD+3VXMFFr56k5XYrpB4=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=

@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
+	dsp_base_config "github.com/blueturbo-ad/go-utils/dsp_base_config"
 	"github.com/blueturbo-ad/go-utils/environment"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
-	logger "github.com/blueturbo-ad/go-utils/zap_loggerex"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,9 +22,10 @@ func TestK8sInformer(t *testing.T) {
 		}
 		Informer := GetInformerSingleton().Informer
 		assert.NotNil(t, Informer)
-		GetInformerSingleton().RegisterCacheInitFun("dsp-logger", logger.GetSingleton().UpdateLoadK8sConfigMap)
-		GetInformerSingleton().RegisterCacheInitFun("feishu", logger.GetSingleton().UpdateLoadK8sConfigMap)
-		go GetInformerSingleton().Run()
+		GetInformerSingleton().RegisterCacheInitFun("bid-server-iconf-config", dsp_base_config.GetSingleton().LoadK8sConfigMap)
+		// GetInformerSingleton().RegisterCacheInitFun("feishu", logger.GetSingleton().UpdateLoadK8sConfigMap)
+
+		GetInformerSingleton().Run()
 		for {
 			select {
 			case err := <-GetInformerSingleton().StartErrChan:
