@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/blueturbo-ad/dsp_data_interface/gen/go/dmp_pb"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
 )

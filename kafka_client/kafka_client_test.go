@@ -10,7 +10,7 @@ import (
 
 	"github.com/blueturbo-ad/go-utils/environment"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 type KafkaMsg struct {

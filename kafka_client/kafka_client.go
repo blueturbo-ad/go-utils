@@ -5,7 +5,8 @@ import (
 	"sync"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 var (
