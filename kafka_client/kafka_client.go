@@ -17,7 +17,8 @@ var (
 
 type KafkaClientManager struct {
 	Config         [2]map[string]*config_manage.KafkaConfig
-	ConsumerClient [2]map[string]*kafka.Consumer
+	ConsumerClient [2]map[string]map[string]*kafka.Consumer
+	ProducerClient [2]map[string]*kafka.Producer // 添加 Producer 缓存
 	index          int
 	rwMutex        sync.RWMutex
 }
@@ -32,27 +33,68 @@ func GetSingleton() *KafkaClientManager {
 
 func NewKafkaClientManager() *KafkaClientManager {
 	return &KafkaClientManager{
-		Config: [2]map[string]*config_manage.KafkaConfig{},
-		index:  -1,
+		Config:         [2]map[string]*config_manage.KafkaConfig{},
+		ConsumerClient: [2]map[string]map[string]*kafka.Consumer{},
+		ProducerClient: [2]map[string]*kafka.Producer{},
+		index:          -1,
 	}
 }
 
 func (k *KafkaClientManager) GetProducerClient(name string) (*kafka.Producer, error) {
 	k.rwMutex.RLock()
 	defer k.rwMutex.RUnlock()
+	// 检查是否已有缓存的 Producer
+	if k.index >= 0 && k.ProducerClient[k.index] != nil {
+		if producer, exists := k.ProducerClient[k.index][name]; exists && producer != nil {
+			// 安全的访问
+		}
+	}
+	// 如果没有缓存，创建新的 Producer 并缓存
 	if k.Config[k.index][name] != nil {
 		config := k.Config[k.index][name]
-		return k.buildProducer(config)
+		producer, err := k.buildProducer(config)
+		if err != nil {
+			return nil, err
+		}
+
+		// 缓存 Producer
+		if k.ProducerClient[k.index] == nil {
+			k.ProducerClient[k.index] = make(map[string]*kafka.Producer)
+		}
+		k.ProducerClient[k.index][name] = producer
+
+		return producer, nil
 	}
-	return nil, fmt.Errorf("kafka client  GetProducerClient is error")
+	return nil, fmt.Errorf("kafka client GetProducerClient is error")
 }
 
 func (k *KafkaClientManager) GetConsumerClient(name string, group string) (*kafka.Consumer, error) {
 	k.rwMutex.RLock()
 	defer k.rwMutex.RUnlock()
+	if consumer, exists := k.ConsumerClient[k.index][name]; exists && consumer != nil {
+		if c, ok := consumer[group]; ok {
+			return c, nil
+		}
+	}
+	// 如果没有缓存，创建新的 Producer 并缓存
 	if k.Config[k.index][name] != nil {
 		config := k.Config[k.index][name]
-		return k.buildConsumer(config, group)
+		consumer, err := k.buildConsumer(config, group)
+		if err != nil {
+			return nil, err
+		}
+
+		// 缓存 Producer
+		// 正确初始化 ConsumerClient
+		if k.ConsumerClient[k.index] == nil {
+			k.ConsumerClient[k.index] = make(map[string]map[string]*kafka.Consumer)
+		}
+		if k.ConsumerClient[k.index][name] == nil {
+			k.ConsumerClient[k.index][name] = make(map[string]*kafka.Consumer)
+		}
+		k.ConsumerClient[k.index][name][group] = consumer
+
+		return consumer, nil
 	}
 	return nil, fmt.Errorf("kafka client  GetConsumerClient is error")
 }
@@ -100,12 +142,31 @@ func (k *KafkaClientManager) UpdateFromFile(confPath string, env string) error {
 func (k *KafkaClientManager) buildKafkaClient(e *config_manage.KafkaConfigManage) error {
 	k.rwMutex.Lock()
 	defer k.rwMutex.Unlock()
-	k.index = (k.index + 1) % 2
-	for _, v := range *e.Config {
-		if k.Config[k.index] == nil {
-			k.Config[k.index] = make(map[string]*config_manage.KafkaConfig)
+
+	oldIndex := k.index
+	newIndex := (k.index + 1) % 2
+
+	// 初始化新配置
+	if k.Config[newIndex] == nil {
+		k.Config[newIndex] = make(map[string]*config_manage.KafkaConfig)
+	} else {
+		// 清空旧配置
+		for key := range k.Config[newIndex] {
+			delete(k.Config[newIndex], key)
 		}
-		k.Config[k.index][v.Name] = &v
+	}
+
+	// 加载新配置
+	for _, v := range *e.Config {
+		k.Config[newIndex][v.Name] = &v
+	}
+
+	// 切换到新配置
+	k.index = newIndex
+
+	// 异步关闭旧连接，避免阻塞和内存泄漏
+	if oldIndex >= 0 {
+		go k.cleanupOldConnections(oldIndex)
 	}
 	return nil
 }
@@ -152,6 +213,71 @@ func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig, grou
 		return nil, fmt.Errorf("failed to create consumer: %s", err)
 	}
 	return c, nil
+}
+
+// 异步清理旧连接，防止内存泄漏
+func (k *KafkaClientManager) cleanupOldConnections(oldIndex int) {
+	// 关闭旧的 Producer
+	if k.ProducerClient[oldIndex] != nil {
+		for name, producer := range k.ProducerClient[oldIndex] {
+			if producer != nil {
+				producer.Close()
+				fmt.Printf("Closed old producer: %s\n", name)
+			}
+		}
+		// 清理 map
+		k.rwMutex.Lock()
+		k.ProducerClient[oldIndex] = make(map[string]*kafka.Producer)
+		k.rwMutex.Unlock()
+	}
+
+	// 关闭旧的 Consumer
+	if k.ConsumerClient[oldIndex] != nil {
+		for name, consumerGroup := range k.ConsumerClient[oldIndex] {
+			for group, consumer := range consumerGroup {
+				if consumer != nil {
+					consumer.Close()
+					fmt.Printf("Closed old consumer: %s-%s\n", name, group)
+				}
+			}
+		}
+		// 清理 map
+		k.rwMutex.Lock()
+		k.ConsumerClient[oldIndex] = make(map[string]map[string]*kafka.Consumer)
+		k.rwMutex.Unlock()
+	}
+}
+
+// 添加优雅关闭方法
+func (k *KafkaClientManager) Close() {
+	k.rwMutex.Lock()
+	defer k.rwMutex.Unlock()
+
+	for i := 0; i < 2; i++ {
+		// 关闭所有 Producer
+		if k.ProducerClient[i] != nil {
+			for name, producer := range k.ProducerClient[i] {
+				if producer != nil {
+					producer.Close()
+					fmt.Printf("Closed producer: %s\n", name)
+				}
+			}
+			k.ProducerClient[i] = make(map[string]*kafka.Producer)
+		}
+
+		// 关闭所有 Consumer
+		if k.ConsumerClient[i] != nil {
+			for name, consumerGroup := range k.ConsumerClient[i] {
+				for group, consumer := range consumerGroup {
+					if consumer != nil {
+						consumer.Close()
+						fmt.Printf("Closed consumer: %s-%s\n", name, group)
+					}
+				}
+			}
+			k.ConsumerClient[i] = make(map[string]map[string]*kafka.Consumer)
+		}
+	}
 }
 
 // func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*kafka.Writer, error) {
