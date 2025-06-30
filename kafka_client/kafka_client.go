@@ -248,8 +248,47 @@ func (k *KafkaClientManager) cleanupOldConnections(oldIndex int) {
 	}
 }
 
-// 添加优雅关闭方法
-func (k *KafkaClientManager) Close() {
+// 关闭指定的 Producer
+func (k *KafkaClientManager) CloseProducer(name string) error {
+	k.rwMutex.Lock()
+	defer k.rwMutex.Unlock()
+
+	if k.index >= 0 && k.ProducerClient[k.index] != nil {
+		if producer, exists := k.ProducerClient[k.index][name]; exists && producer != nil {
+			producer.Close()
+			delete(k.ProducerClient[k.index], name)
+			fmt.Printf("Closed producer: %s\n", name)
+			return nil
+		}
+	}
+	return fmt.Errorf("producer %s not found", name)
+}
+
+// 关闭指定的 Consumer
+func (k *KafkaClientManager) CloseConsumer(name string, group string) error {
+	k.rwMutex.Lock()
+	defer k.rwMutex.Unlock()
+
+	if k.index >= 0 && k.ConsumerClient[k.index] != nil {
+		if consumerGroup, exists := k.ConsumerClient[k.index][name]; exists && consumerGroup != nil {
+			if consumer, ok := consumerGroup[group]; ok && consumer != nil {
+				consumer.Close()
+				delete(consumerGroup, group)
+				fmt.Printf("Closed consumer: %s-%s\n", name, group)
+
+				// 如果该 name 下没有其他 group 了，删除整个 name 项
+				if len(consumerGroup) == 0 {
+					delete(k.ConsumerClient[k.index], name)
+				}
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("consumer %s-%s not found", name, group)
+}
+
+// 修改后的全量关闭方法（重命名为 CloseAll）
+func (k *KafkaClientManager) CloseAll() {
 	k.rwMutex.Lock()
 	defer k.rwMutex.Unlock()
 
@@ -278,6 +317,11 @@ func (k *KafkaClientManager) Close() {
 			k.ConsumerClient[i] = make(map[string]map[string]*kafka.Consumer)
 		}
 	}
+}
+
+// 保持原有的 Close 方法用于向后兼容，但建议使用 CloseAll
+func (k *KafkaClientManager) Close() {
+	k.CloseAll()
 }
 
 // func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*kafka.Writer, error) {
