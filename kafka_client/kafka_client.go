@@ -47,6 +47,7 @@ func (k *KafkaClientManager) GetProducerClient(name string) (*kafka.Producer, er
 	if k.index >= 0 && k.ProducerClient[k.index] != nil {
 		if producer, exists := k.ProducerClient[k.index][name]; exists && producer != nil {
 			// 安全的访问
+			return producer, nil
 		}
 	}
 	// 如果没有缓存，创建新的 Producer 并缓存
