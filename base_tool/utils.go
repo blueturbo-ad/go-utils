@@ -48,6 +48,14 @@ func StringToUInt32(str string) (uint32, error) {
 	return uint32(value), nil
 }
 
+func StringToUInt64(str string) (uint64, error) {
+	value, err := strconv.ParseUint(str, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return value, nil
+}
+
 // " ", "\n", "\t", "\r"
 func RemoveWhitespace(s string) string {
 	specialChars := []string{" ", "\n", "\t", "\r"}
