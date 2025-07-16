@@ -25,11 +25,10 @@ func GetSingleton() *DspBaseConfigManage {
 	return instance
 }
 
-func (d *DspBaseConfigManage) RegistHookFunc(f func(config string) error) {
+func (d *DspBaseConfigManage) RegistHookFunc(f func(config string) error, hookName string) {
 	if d.Hooks == nil {
 		d.Hooks = make(map[string]func(config string) error)
 	}
-	hookName := fmt.Sprintf("%p", f)
 	if _, ok := d.Hooks[hookName]; !ok {
 		d.Hooks[hookName] = f
 	}
