@@ -26,7 +26,7 @@ func TestDspBaseConfig(t *testing.T) {
 			fmt.Println("hook func", config)
 			return nil
 		})
-		err = GetSingleton().LoadFileConfig(cs, "Dev")
+		err = GetSingleton().LoadFileConfig(cs, "Dev", "")
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
 		}

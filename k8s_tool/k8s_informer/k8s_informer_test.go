@@ -22,7 +22,10 @@ func TestK8sInformer(t *testing.T) {
 		}
 		Informer := GetInformerSingleton().Informer
 		assert.NotNil(t, Informer)
-		GetInformerSingleton().RegisterCacheInitFun("bid-server-iconf-config", dsp_base_config.GetSingleton().LoadK8sConfigMap)
+		GetInformerSingleton().RegisterCacheInitFun("bid-server-iconf-config", func(configMapName string, env string) error {
+			// Provide a default value for hookName or adjust as needed
+			return dsp_base_config.GetSingleton().LoadK8sConfigMap(configMapName, env, "")
+		})
 		// GetInformerSingleton().RegisterCacheInitFun("feishu", logger.GetSingleton().UpdateLoadK8sConfigMap)
 
 		GetInformerSingleton().Run()
