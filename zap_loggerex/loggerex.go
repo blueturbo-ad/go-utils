@@ -80,7 +80,7 @@ func (l *LoggerManager) GetCurConfig() *LoggerEx {
 	return l.current
 }
 
-func (l *LoggerManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (l *LoggerManager) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.ZapLoggerConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {

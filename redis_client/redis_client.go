@@ -57,7 +57,7 @@ func (r *RedisClientManager) GetWriteClient(name string) *redis.ClusterClient {
 	return nil
 }
 
-func (l *RedisClientManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (l *RedisClientManager) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.RedisConfigManager)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {

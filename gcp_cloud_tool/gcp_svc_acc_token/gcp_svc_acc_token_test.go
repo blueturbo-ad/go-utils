@@ -15,10 +15,10 @@ func TestGcpSvcAccToken(t *testing.T) {
 	os.Setenv("POD_NAMESPACE", "dsp-ns")
 	environment.Init()
 	k8sclient.GetSingleton().SetUp()
-	gcpcloudstorage.GetSingleton().UpdateLoadK8sConfigMap("gcp-cloud-storage-config", "Dev")
+	gcpcloudstorage.GetSingleton().UpdateLoadK8sConfigMap("gcp-cloud-storage-config", "Dev", "")
 	t.Run("TestGcpSvcAccToken", func(t *testing.T) {
 		gact := GetSingleton()
-		gact.UpdateLoadK8sConfigMap("svc-acc-config", "Dev")
+		gact.UpdateLoadK8sConfigMap("svc-acc-config", "Dev", "")
 
 	})
 

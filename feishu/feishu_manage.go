@@ -80,7 +80,7 @@ func GetInstance() *FeishuManage {
 	return instance
 }
 
-func (l *FeishuManage) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (l *FeishuManage) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.FeishuConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {

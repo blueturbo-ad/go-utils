@@ -34,7 +34,7 @@ func (g *GcpSvcAccountToken) GetToken(accounName string) string {
 	return g.Tokens[accounName]
 }
 
-func (g *GcpSvcAccountToken) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (g *GcpSvcAccountToken) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.GcpSvcAccountTokenConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {

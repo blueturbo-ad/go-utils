@@ -19,7 +19,7 @@ func TestBigtableclient(t *testing.T) {
 	k8sclient.GetSingleton().SetUp()
 	t.Run("TestBigTableClient", func(t *testing.T) {
 		cliobj := GetSingleton()
-		if err := cliobj.UpdateLoadK8sConfigMap("bigtable", "Dev"); err != nil {
+		if err := cliobj.UpdateLoadK8sConfigMap("bigtable", "Dev", ""); err != nil {
 			t.Errorf("GetSingleton() = %v; want nil", err)
 		}
 
@@ -27,7 +27,7 @@ func TestBigtableclient(t *testing.T) {
 	t.Run("test bigtable insert", func(t *testing.T) {
 		ctx := context.Background()
 		cliobj := GetSingleton()
-		if err := cliobj.UpdateLoadK8sConfigMap("bigtable", "Dev"); err != nil {
+		if err := cliobj.UpdateLoadK8sConfigMap("bigtable", "Dev", ""); err != nil {
 			t.Errorf("GetSingleton() = %v; want nil", err)
 		}
 		client := cliobj.GetClient()

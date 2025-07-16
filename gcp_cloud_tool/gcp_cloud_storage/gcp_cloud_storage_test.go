@@ -15,7 +15,7 @@ func TestReadGCPCloudStorageFile(t *testing.T) {
 	os.Setenv("POD_NAMESPACE", "dsp-ns")
 	environment.Init()
 	k8sclient.GetSingleton().SetUp()
-	GetSingleton().UpdateLoadK8sConfigMap("gcp-cloud-storage-config", environment.GetEnv())
+	GetSingleton().UpdateLoadK8sConfigMap("gcp-cloud-storage-config", environment.GetEnv(), "")
 
 	client := GetSingleton().GetClient("dsp_bucket")
 

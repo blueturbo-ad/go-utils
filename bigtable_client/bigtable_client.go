@@ -42,7 +42,7 @@ func (b *BigTableClient) GetClient() *bigtable.Client {
 	return b.Clients[b.index]
 }
 
-func (b *BigTableClient) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (b *BigTableClient) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.BigTableConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {

@@ -100,7 +100,7 @@ func (k *KafkaClientManager) GetConsumerClient(name string, group string) (*kafk
 	return nil, fmt.Errorf("kafka client  GetConsumerClient is error")
 }
 
-func (k *KafkaClientManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (k *KafkaClientManager) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.KafkaConfigManage)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {

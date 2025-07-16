@@ -18,14 +18,14 @@ func TestRedisClientTest(t *testing.T) {
 	k8sclient.GetSingleton().SetUp()
 	t.Run("TestRedisClientTest", func(t *testing.T) {
 		var e = GetSingleton()
-		err := e.UpdateLoadK8sConfigMap("redis-conf", "Dev")
+		err := e.UpdateLoadK8sConfigMap("redis-conf", "Dev", "")
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
 		}
 	})
 	t.Run("TestRedisGetReadClient", func(t *testing.T) {
 		var e = GetSingleton()
-		err := e.UpdateLoadK8sConfigMap("redis-conf", "Dev")
+		err := e.UpdateLoadK8sConfigMap("redis-conf", "Dev", "")
 		if err != nil {
 			t.Errorf("os.Getwd() = %v; want nil", err)
 		}

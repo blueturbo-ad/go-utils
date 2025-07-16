@@ -70,7 +70,7 @@ func TestGetLogger(t *testing.T) {
 		// var e = new(ZapLoggerConfig)
 		// e.LoadK8sConfigMap("dsp-logger", "Pro")
 		logger := GetSingleton()
-		logger.UpdateLoadK8sConfigMap("event-logger", "Pro")
+		logger.UpdateLoadK8sConfigMap("event-logger", "Pro", "")
 		logger.GetCurConfig()
 		for {
 			time.Sleep(1 * time.Second)

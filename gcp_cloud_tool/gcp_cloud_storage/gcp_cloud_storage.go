@@ -31,7 +31,7 @@ func (g *GcpCloudStorage) GetClient(bucketName string) *storage.BucketHandle {
 	return g.Clients[bucketName]
 }
 
-func (g *GcpCloudStorage) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (g *GcpCloudStorage) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.GcpCloudStorageTokenConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {
