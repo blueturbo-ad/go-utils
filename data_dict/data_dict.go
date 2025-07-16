@@ -31,12 +31,13 @@ type DataDict[T any] struct {
 	// close
 	closeC chan struct{}
 
-	initW    *sync.WaitGroup
-	initErrC chan error
-	closeW   *sync.WaitGroup
+	initW      *sync.WaitGroup
+	initErrC   chan error
+	closeW     *sync.WaitGroup
+	loggerName string
 }
 
-func NewDataDict[T any](option DataDictOption, initW *sync.WaitGroup, closeW *sync.WaitGroup, initErrC chan error, closeC chan struct{}) *DataDict[T] {
+func NewDataDict[T any](option DataDictOption, initW *sync.WaitGroup, closeW *sync.WaitGroup, initErrC chan error, closeC chan struct{}, logname string) *DataDict[T] {
 	d := &DataDict[T]{
 		opts:         option,
 		readFileCmdC: make(chan time.Time),
@@ -44,6 +45,7 @@ func NewDataDict[T any](option DataDictOption, initW *sync.WaitGroup, closeW *sy
 		initW:        initW,
 		initErrC:     initErrC,
 		closeW:       closeW,
+		loggerName:   logname,
 	}
 
 	d.dict.Store(nil)
@@ -60,7 +62,7 @@ func (d *DataDict[T]) GetDict() *T {
 }
 
 func (d *DataDict[T]) checkFunc() (time.Time, error) {
-	data, err := basetool.ReadGCPCloudStorageFile(d.opts.FileStatPath)
+	data, err := basetool.ReadGCPCloudStorageFile(d.opts.FileStatPath, d.loggerName)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -77,7 +79,7 @@ func (d *DataDict[T]) RegisterFunc(
 	readFileFunc func() ([]byte, error), parseFunc func([]byte) (*T, error)) {
 	if readFileFunc == nil {
 		d.readFileFunc = func() ([]byte, error) {
-			return basetool.ReadGCPCloudStorageFile(d.opts.FilePath)
+			return basetool.ReadGCPCloudStorageFile(d.opts.FilePath, d.loggerName)
 		}
 	} else {
 		d.readFileFunc = readFileFunc
@@ -95,28 +97,28 @@ func (d *DataDict[T]) checkBackground() {
 	ticker := time.NewTicker(d.opts.CheckDur)
 
 	for {
-		zap_loggerex.GetLogger().Debug("bid_stdout_logger", "wait for check trigger")
+		zap_loggerex.GetLogger().Debug(d.loggerName, "wait for check trigger")
 
 		select {
 		case <-ticker.C:
-			zap_loggerex.GetSingleton().Debug("bid_stdout_logger", "check file stat")
+			zap_loggerex.GetSingleton().Debug(d.loggerName, "check file stat")
 
 			fileModTime, err := d.checkFunc()
 			ticker.Reset(d.opts.CheckDur)
 			if err != nil {
-				zap_loggerex.GetSingleton().Warn("bid_stdout_logger", "failed to get file modify time %s", err)
+				zap_loggerex.GetSingleton().Warn(d.loggerName, "failed to get file modify time %s", err)
 				continue
 			}
 
-			zap_loggerex.GetSingleton().Debug("bid_stdout_logger", "file modify time is %v", fileModTime)
+			zap_loggerex.GetSingleton().Debug(d.loggerName, "file modify time is %v", fileModTime)
 
 			if fileModTime.After(d.lastReloadTime) {
-				zap_loggerex.GetSingleton().Debug("bid_stdout_logger", "trigger reload")
+				zap_loggerex.GetSingleton().Debug(d.loggerName, "trigger reload")
 				d.readFileCmdC <- fileModTime
 			}
 
 		case <-d.closeC:
-			zap_loggerex.GetSingleton().Info("bid_stdout_logger", "close data dict check background")
+			zap_loggerex.GetSingleton().Info(d.loggerName, "close data dict check background")
 			return
 		}
 	}
@@ -128,12 +130,12 @@ func (d *DataDict[T]) reloadBackground() {
 	}()
 
 	for {
-		zap_loggerex.GetSingleton().Debug("bid_stdout_logger", "wait for reload trigger")
+		zap_loggerex.GetSingleton().Debug(d.loggerName, "wait for reload trigger")
 
 		select {
 		case fileModTime := <-d.readFileCmdC:
 			begTime := time.Now().UTC()
-			zap_loggerex.GetSingleton().Debug("bid_stdout_logger", "reload dict")
+			zap_loggerex.GetSingleton().Debug(d.loggerName, "reload dict")
 
 			data, err := d.readFileFunc()
 			if err != nil {
@@ -142,7 +144,7 @@ func (d *DataDict[T]) reloadBackground() {
 					d.initW.Done()
 				}
 
-				zap_loggerex.GetSingleton().Warn("bid_stdout_logger", "failed to reload dict %s", err)
+				zap_loggerex.GetSingleton().Warn(d.loggerName, "failed to reload dict %s", err)
 				continue
 			}
 
@@ -153,7 +155,7 @@ func (d *DataDict[T]) reloadBackground() {
 					d.initW.Done()
 				}
 
-				zap_loggerex.GetSingleton().Warn("bid_stdout_logger", "failed to parse dict %s", err)
+				zap_loggerex.GetSingleton().Warn(d.loggerName, "failed to parse dict %s", err)
 				continue
 			}
 
@@ -165,10 +167,10 @@ func (d *DataDict[T]) reloadBackground() {
 
 			d.lastReloadTime = fileModTime
 
-			zap_loggerex.GetSingleton().Info("bid_stdout_logger", "reload dict cost %v", time.Since(begTime))
+			zap_loggerex.GetSingleton().Info(d.loggerName, "reload dict cost %v", time.Since(begTime))
 
 		case <-d.closeC:
-			zap_loggerex.GetSingleton().Info("bid_stdout_logger", "close data dict reload background")
+			zap_loggerex.GetSingleton().Info(d.loggerName, "close data dict reload background")
 			return
 		}
 	}

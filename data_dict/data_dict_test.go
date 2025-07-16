@@ -13,7 +13,7 @@ func TestReload(t *testing.T) {
 	initErrC := make(chan error, 1)
 	closeC := make(chan struct{})
 
-	d := NewDataDict[map[string]int](DataDictOption{CheckDur: 5 * time.Second}, &initW, &closeW, initErrC, closeC)
+	d := NewDataDict[map[string]int](DataDictOption{CheckDur: 5 * time.Second}, &initW, &closeW, initErrC, closeC, "bid_stdout_logger")
 	if d == nil {
 		t.Error("NewDataDict returned nil")
 		return

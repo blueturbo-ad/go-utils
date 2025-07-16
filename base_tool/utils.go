@@ -11,8 +11,8 @@ import (
 	"github.com/blueturbo-ad/go-utils/zap_loggerex"
 )
 
-func ReadGCPCloudStorageFile(filePath string) ([]byte, error) {
-	zap_loggerex.GetSingleton().Debug("bid_stdout_logger", "read file from GCP cloud storage %v", filePath)
+func ReadGCPCloudStorageFile(filePath string, logName string) ([]byte, error) {
+	zap_loggerex.GetSingleton().Debug(logName, "read file from GCP cloud storage %v", filePath)
 
 	client := gcp_cloud_storage.GetSingleton().GetClient("dsp_bucket")
 	if client == nil {
