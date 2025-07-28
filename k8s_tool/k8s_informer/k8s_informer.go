@@ -34,6 +34,7 @@ func GetInformerSingleton() *Informer {
 
 type Informer struct {
 	cacheInitFuns map[string]func(configMapName, env string, hookName string) error
+	hookMap       map[string]string
 	k8sClient     *kubernetes.Clientset
 	Informer      *cache.SharedIndexInformer
 	StartErrChan  chan error
@@ -41,14 +42,16 @@ type Informer struct {
 	Ssucchan      chan bool       // 首次启动等待时间是30s 如果我们提前启动完成就给这个信号来通知
 }
 
-func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string, hookName string) error) {
+func (i *Informer) RegisterCacheInitFun(key string, fun func(configMapName, env string, hookName string) error, hookName string) {
 	i.cacheInitFuns[key] = fun
+	i.hookMap[key] = hookName
 	i.cacheFunc[key] = false
 }
 
 func (i *Informer) SetUp() error {
 	var err error
 	i.cacheInitFuns = make(map[string]func(configMapName, env string, hookName string) error)
+	i.hookMap = make(map[string]string)
 	i.k8sClient = k8sclient.GetSingleton().GetClient()
 	namespace := environment.GetSingleton().GetNamespace()
 	fmt.Println("namespace: ", namespace)
@@ -82,7 +85,11 @@ func (i *Informer) Run() {
 				if IsConfigMapEqual(oldConfigMap, newConfigMap) {
 					return
 				}
-				if err := initFunc(newConfigMap.Name, env, ""); err != nil {
+				hookName, ok := i.hookMap[newConfigMap.Name]
+				if !ok {
+					hookName = ""
+				}
+				if err := initFunc(newConfigMap.Name, env, hookName); err != nil {
 					msg := fmt.Sprintf("update config map error: %s", err.Error())
 					loggerex.GetSingleton().Error("system_logger", "%s", msg)
 				}
