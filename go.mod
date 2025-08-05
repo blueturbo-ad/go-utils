@@ -7,6 +7,7 @@ toolchain go1.24.3
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.10.0
 	github.com/micro/go-micro/v2 v2.9.1
+	github.com/panjf2000/ants v1.3.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/stretchr/testify v1.10.0
 	go.etcd.io/etcd/client/v3 v3.5.17
