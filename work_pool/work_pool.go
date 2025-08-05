@@ -64,11 +64,9 @@ func (w *WorkPool) BuildWorkPool(e *config_manage.WorkPoolConfigManager) error {
 	var Pool *ants.Pool
 	var err error
 	for _, conf := range *e.Config {
-		if w.Pools == nil {
-			Pool, err = ants.NewPool(conf.PoolSize, ants.WithPreAlloc(false))
-			if err != nil {
-				return errors.New("failed to create ants pool: " + err.Error())
-			}
+		Pool, err = ants.NewPool(conf.PoolSize, ants.WithPreAlloc(false))
+		if err != nil {
+			return errors.New("failed to create ants pool: " + err.Error())
 		}
 		w.Pools[conf.Name] = Pool
 	}
