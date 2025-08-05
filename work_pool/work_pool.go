@@ -41,6 +41,14 @@ func (w *WorkPool) UpdateLoadK8sConfigMap(configMapName, env string, hookName st
 	}
 	return w.BuildWorkPool(e)
 }
+func (w *WorkPool) InitLoadK8sConfigMap(configMapName, env string, hookName string) error {
+	var e = new(config_manage.WorkPoolConfigManager)
+	err := e.LoadK8sConfigMap(configMapName, env)
+	if err != nil {
+		return fmt.Errorf("kafka client  LoadK8sConfigMap is error %s", err.Error())
+	}
+	return w.BuildWorkPool(e)
+}
 
 func (w *WorkPool) UpdateFromFile(confPath string, env string) error {
 	var err error
@@ -77,6 +85,19 @@ func (p *WorkPool) GetGinCtxPool(key string) (*ants.Pool, error) {
 	}
 
 	return pool, nil
+}
+
+func (p *WorkPool) WorkPoolTune(e *config_manage.WorkPoolConfigManager) {
+	if p.Pools == nil {
+		p.Pools = make(map[string]*ants.Pool)
+	}
+	for _, conf := range *e.Config {
+		if pool, exists := p.Pools[conf.Name]; exists {
+			if pool.Cap() != conf.PoolSize {
+				pool.Tune(uint(conf.PoolSize))
+			}
+		}
+	}
 }
 
 func (p *WorkPool) Release() {
