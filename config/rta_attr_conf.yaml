@@ -1,0 +1,21 @@
+curused: Dev
+Dev:
+  version: "1.0.0"
+  rta_attr:
+    tiktok:
+        us:
+          url: "https://growth-rta.tiktokv-us.com"
+        eu:
+          url: "https://growth-rta.tiktokv-eu.com"
+        row:
+          url: "https://growth-rta.byteintl.com"
+Pro:
+  version: "1.0.0"
+  rta_attr:
+    tiktok:
+        us:
+          url: "https://growth-rta.tiktokv-us.com"
+        eu:
+          url: "https://growth-rta.tiktokv-eu.com"
+        row:
+          url: "https://growth-rta.byteintl.com"
