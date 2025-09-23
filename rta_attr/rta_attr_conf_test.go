@@ -1,11 +1,13 @@
 package rtaattr
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"testing"
 
+	dsp_base_config "github.com/blueturbo-ad/go-utils/dsp_base_config"
 	"github.com/blueturbo-ad/go-utils/environment"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
 )
@@ -38,8 +40,11 @@ func TestRtaAttrConf(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		GetSingleton().Reload(string(data))
-		t.Logf("RtaAttrConf: %+v", GetSingleton().GetRtaAttrConf("tiktok", ""))
+		dsp_base_config.GetSingleton().RegistHookFunc(GetSingleton().Reload, "rta_attr_conf")
+		if err := dsp_base_config.GetSingleton().LoadFileConfig(p, environment.GetEnv(), "rta_attr_conf"); err != nil {
+			fmt.Printf("Failed to load config file: %v\n", err)
+		}
+		t.Logf("RtaAttrConf: %+v", GetSingleton().GetRtaAttrConf("tiktok"))
 
 	})
 
