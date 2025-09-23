@@ -1,7 +1,6 @@
 package rtaattr
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/blueturbo-ad/go-utils/zap_loggerex"
@@ -38,10 +37,14 @@ Pro:
 */
 
 var (
-	instance    *RtaAttrConf
+	instance    *RtaAttrConfig
 	once        sync.Once
 	EmptyString = ""
 )
+
+type RtaAttrConfig struct {
+	attr *FullConfig
+}
 
 // 修正结构体定义
 type RtaAttrConf struct {
@@ -62,44 +65,55 @@ type FullConfig struct {
 	Pro     RtaAttrConf `yaml:"Pro"`
 }
 
-func GetSingleton() *RtaAttrConf {
+func GetSingleton() *RtaAttrConfig {
 	once.Do(func() {
-		instance = NewRtaAttrConf()
+		instance = NewRtaAttrConfig()
 
 	})
 	return instance
 }
 
-func NewRtaAttrConf() *RtaAttrConf {
-	return &RtaAttrConf{
-		RtaAttr: make(map[string]RegionConf, 0),
+func NewRtaAttrConfig() *RtaAttrConfig {
+	return &RtaAttrConfig{
+		attr: &FullConfig{},
 	}
 }
 
-func (r *RtaAttrConf) Reload(conf string, env string) error {
+func (r *RtaAttrConfig) Reload(conf string) error {
 	var fullConfig FullConfig
 	if err := yaml.Unmarshal([]byte(conf), &fullConfig); err != nil {
 		zap_loggerex.GetSingleton().Error("bid_stdout_logger", "failed to unmarshal yaml %s, %+v", string(conf), err)
 		return err
 	}
-	switch env {
-	case "Dev":
-		*r = fullConfig.Dev
-	case "Pro":
-		*r = fullConfig.Pro
-	default:
-		zap_loggerex.GetSingleton().Error("bid_stdout_logger", "unknown environment: %s", env)
-		return fmt.Errorf("unknown environment: %s", env)
-	}
+	r.attr = &fullConfig
 	return nil
 }
 
-func (r *RtaAttrConf) GetRtaAttrConf(source string) RegionConf {
-	if r.RtaAttr == nil {
+func (r *RtaAttrConfig) GetRtaAttrConf(source string, env string) RegionConf {
+	var conf *RtaAttrConf
+	if env == "" {
+		env = r.attr.CurUsed
+	}
+	switch env {
+	case "Dev":
+		conf = &r.attr.Dev
+	case "Pro":
+		conf = &r.attr.Pro
+	default:
+		zap_loggerex.GetSingleton().Error("bid_stdout_logger", "invalid environment: %s", env)
 		return nil
 	}
-	if val, ok := r.RtaAttr[source]; ok {
-		return val
+
+	if conf == nil {
+		zap_loggerex.GetSingleton().Error("bid_stdout_logger", "configuration for environment %s is nil", env)
+		return nil
 	}
-	return nil
+
+	endpointConf, exists := conf.RtaAttr[source]
+	if !exists {
+		zap_loggerex.GetSingleton().Error("bid_stdout_logger", "source %s not found in environment %s", source, env)
+		return nil
+	}
+
+	return endpointConf
 }

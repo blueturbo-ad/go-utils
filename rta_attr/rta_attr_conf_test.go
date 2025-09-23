@@ -38,8 +38,8 @@ func TestRtaAttrConf(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		GetSingleton().Reload(string(data), "Pro")
-		t.Logf("RtaAttrConf: %+v", GetSingleton().GetRtaAttrConf("tiktok"))
+		GetSingleton().Reload(string(data))
+		t.Logf("RtaAttrConf: %+v", GetSingleton().GetRtaAttrConf("tiktok", ""))
 
 	})
 
