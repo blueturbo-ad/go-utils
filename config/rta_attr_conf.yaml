@@ -4,18 +4,36 @@ Dev:
   rta_attr:
     tiktok:
         us:
-          url: "https://growth-rta.tiktokv-us.com"
+          evaluate_url: "https://growth-rta.tiktokv-us.com/api/v1/rta/network"
+          report_url : "https://growth-rta.tiktokv-us.com/api/v1/rta/report"
+          ak: "12321321312"
+          sk: "12321312312321321321321321321321321"
         eu:
-          url: "https://growth-rta.tiktokv-eu.com"
+          evaluate_url: "https://growth-rta.tiktokv-eu.com/api/v1/rta/network"
+          report_url : "https://growth-rta.tiktokv-us.com/api/v1/rta/report"
+          ak: "12321321312"
+          sk: "12321312312321321321321321321321321"
         row:
-          url: "https://growth-rta.byteintl.com"
+          evaluate_url: "https://growth-rta.byteintl.com/api/v1/rta/network"
+          report_url : "https://growth-rta.tiktokv-us.com/api/v1/rta/report"
+          ak: "12321321312"
+          sk: "12321312312321321321321321321321321"
 Pro:
   version: "1.0.0"
   rta_attr:
     tiktok:
         us:
-          url: "https://growth-rta.tiktokv-us.com"
+          evaluate_url: "https://growth-rta.tiktokv-us.com/api/v1/rta/network"
+          report_url : "https://growth-rta.tiktokv-us.com/api/v1/rta/report"
+          ak: "12321321312"
+          sk: "12321312312321321321321321321321321"
         eu:
-          url: "https://growth-rta.tiktokv-eu.com"
+          evaluate_url: "https://growth-rta.tiktokv-eu.com/api/v1/rta/network"
+          report_url : "https://growth-rta.tiktokv-us.com/api/v1/rta/report"
+          ak: "12321321312"
+          sk: "12321312312321321321321321321321321"
         row:
-          url: "https://growth-rta.byteintl.com"
+          evaluate_url: "https://growth-rta.byteintl.com/api/v1/rta/network"
+          report_url : "https://growth-rta.tiktokv-us.com/api/v1/rta/report"
+          ak: "12321321312"
+          sk: "12321312312321321321321321321321321"

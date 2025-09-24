@@ -52,13 +52,7 @@ type RtaAttrConf struct {
 	RtaAttr map[string]RegionConf `yaml:"rta_attr"`
 }
 
-type RegionConf map[string]EndpointConf
-
-type EndpointConf struct {
-	Url string `yaml:"url"`
-	Ak  string `yaml:"ak,omitempty"`
-	Sk  string `yaml:"sk,omitempty"`
-}
+type RegionConf map[string]map[string]string
 
 func GetSingleton() *RtaAttrConfig {
 	once.Do(func() {
