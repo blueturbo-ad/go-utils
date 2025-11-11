@@ -96,9 +96,11 @@ func (h *HttpClientManager) BuildClient(e *config_manage.HttpClientConfig) error
 					Timeout:   time.Duration(v.TimeOut) * time.Millisecond,
 					KeepAlive: time.Duration(v.KeepALive) * time.Millisecond,
 				}).DialContext,
-				MaxIdleConns:        v.MaxIdleConns,
-				MaxIdleConnsPerHost: v.MaxIdleConnsPerHost,
-				IdleConnTimeout:     time.Duration(v.IdleConnTimeout) * time.Millisecond,
+				ResponseHeaderTimeout: time.Duration(v.ResponseHeaderTimeout) * time.Millisecond,
+				ExpectContinueTimeout: time.Duration(v.ExpectContinueTimeout) * time.Millisecond,
+				MaxIdleConns:          v.MaxIdleConns,
+				MaxIdleConnsPerHost:   v.MaxIdleConnsPerHost,
+				IdleConnTimeout:       time.Duration(v.IdleConnTimeout) * time.Millisecond,
 			},
 		}
 		h.HttpClient[h.index][v.Name] = &client

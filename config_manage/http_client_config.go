@@ -8,12 +8,14 @@ import (
 )
 
 type Http1xConfig struct {
-	Name                string `yaml:"name"`
-	TimeOut             int64  `yaml:"timeout"`
-	KeepALive           int64  `yaml:"keep_alive"`
-	MaxIdleConns        int    `yaml:"max_idle_conns"`
-	MaxIdleConnsPerHost int    `yaml:"max_idle_conns_per_host"`
-	IdleConnTimeout     int64  `yaml:"idle_conn_timeout"`
+	Name                  string `yaml:"name"`
+	TimeOut               int64  `yaml:"timeout"`
+	KeepALive             int64  `yaml:"keep_alive"`
+	MaxIdleConns          int    `yaml:"max_idle_conns"`
+	MaxIdleConnsPerHost   int    `yaml:"max_idle_conns_per_host"`
+	IdleConnTimeout       int64  `yaml:"idle_conn_timeout"`
+	ResponseHeaderTimeout int64  `yaml:"response_header_timeout"`
+	ExpectContinueTimeout int64  `yaml:"expect_continue_timeout"`
 }
 
 type HttpClientConfig struct {
