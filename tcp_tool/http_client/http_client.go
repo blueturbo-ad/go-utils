@@ -93,12 +93,12 @@ func (h *HttpClientManager) BuildClient(e *config_manage.HttpClientConfig) error
 			Transport: &http.Transport{
 				Proxy: http.ProxyFromEnvironment,
 				DialContext: (&net.Dialer{
-					Timeout:   time.Duration(v.TimeOut) * time.Second,
-					KeepAlive: time.Duration(v.KeepALive) * time.Second,
+					Timeout:   time.Duration(v.TimeOut) * time.Millisecond,
+					KeepAlive: time.Duration(v.KeepALive) * time.Millisecond,
 				}).DialContext,
 				MaxIdleConns:        v.MaxIdleConns,
 				MaxIdleConnsPerHost: v.MaxIdleConnsPerHost,
-				IdleConnTimeout:     time.Duration(v.IdleConnTimeout) * time.Second,
+				IdleConnTimeout:     time.Duration(v.IdleConnTimeout) * time.Millisecond,
 			},
 		}
 		h.HttpClient[h.index][v.Name] = &client
