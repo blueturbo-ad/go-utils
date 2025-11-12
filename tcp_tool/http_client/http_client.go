@@ -42,7 +42,7 @@ func (h *HttpClientManager) GetClient(name string) *http.Client {
 	return nil
 }
 
-func (h *HttpClientManager) UpdateLoadK8sConfigMap(configMapName, env string) error {
+func (h *HttpClientManager) UpdateLoadK8sConfigMap(configMapName, env string, hookName string) error {
 	var e = new(config_manage.HttpClientConfig)
 	err := e.LoadK8sConfigMap(configMapName, env)
 	if err != nil {
