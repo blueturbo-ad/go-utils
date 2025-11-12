@@ -154,14 +154,20 @@ func newZapLogger(conf *config_manage.LoggerConfig) *zap.Logger {
 		return lev < zap.WarnLevel && lev >= zap.DebugLevel && lev >= zapcore.Level(conf.Level)
 	})
 
-	prodEncoder := createLogOutputEncoderConfig()
+	prodEncoder := createLogOutputEncoderConfig(conf)
 	prodEncoder.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	lowWriteSyncer := createWriteSyncer(conf, true)
 	highWriteSyncer := createWriteSyncer(conf, false)
+	var funhandle zapcore.Encoder
+	if conf.Format == "cvs" {
+		funhandle = zapcore.NewConsoleEncoder(prodEncoder)
+	} else {
+		funhandle = zapcore.NewJSONEncoder(prodEncoder)
+	}
 
-	highCore := zapcore.NewCore(zapcore.NewJSONEncoder(prodEncoder), highWriteSyncer, highPriority)
-	lowCore := zapcore.NewCore(zapcore.NewJSONEncoder(prodEncoder), lowWriteSyncer, lowPriority)
+	highCore := zapcore.NewCore(funhandle, highWriteSyncer, highPriority)
+	lowCore := zapcore.NewCore(funhandle, lowWriteSyncer, lowPriority)
 
 	return zap.New(zapcore.NewTee(highCore, lowCore), zap.AddCaller(), zap.AddCallerSkip(2))
 }
@@ -219,22 +225,41 @@ func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.Wr
 	return zapcore.AddSync(lumberJackLogger)
 }
 
-func createLogOutputEncoderConfig() zapcore.EncoderConfig {
-	return zapcore.EncoderConfig{
-		TimeKey:          "ts",
-		LevelKey:         "level",
-		NameKey:          "logger",
-		CallerKey:        "caller_line",
-		FunctionKey:      zapcore.OmitKey,
-		MessageKey:       "msg",
-		StacktraceKey:    "stacktrace",
-		LineEnding:       "\n",
-		EncodeDuration:   zapcore.SecondsDurationEncoder,
-		EncodeLevel:      zapcore.LowercaseLevelEncoder,
-		EncodeTime:       zapcore.EpochTimeEncoder,
-		ConsoleSeparator: "\n",
-		EncodeCaller:     zapcore.ShortCallerEncoder,
+func createLogOutputEncoderConfig(conf *config_manage.LoggerConfig) zapcore.EncoderConfig {
+	if conf.Format == "cvs" {
+		return zapcore.EncoderConfig{
+			MessageKey:     "msg",
+			TimeKey:        zapcore.OmitKey,
+			LevelKey:       zapcore.OmitKey,
+			NameKey:        zapcore.OmitKey,
+			CallerKey:      zapcore.OmitKey,
+			FunctionKey:    zapcore.OmitKey,
+			StacktraceKey:  zapcore.OmitKey,
+			LineEnding:     zapcore.DefaultLineEnding,
+			EncodeDuration: zapcore.SecondsDurationEncoder,
+			EncodeLevel:    zapcore.LowercaseLevelEncoder,
+			EncodeTime:     zapcore.EpochTimeEncoder,
+			EncodeCaller:   zapcore.ShortCallerEncoder,
+		}
+	} else {
+		return zapcore.EncoderConfig{
+			TimeKey:          "ts",
+			LevelKey:         "level",
+			NameKey:          "logger",
+			CallerKey:        "caller_line",
+			FunctionKey:      zapcore.OmitKey,
+			MessageKey:       "msg",
+			StacktraceKey:    "stacktrace",
+			LineEnding:       "\n",
+			EncodeDuration:   zapcore.SecondsDurationEncoder,
+			EncodeLevel:      zapcore.LowercaseLevelEncoder,
+			EncodeTime:       zapcore.EpochTimeEncoder,
+			ConsoleSeparator: "\n",
+			EncodeCaller:     zapcore.ShortCallerEncoder,
+		}
+
 	}
+
 }
 
 func (l *LoggerManager) getLogger(name string) (*LoggerWrapper, error) {

@@ -21,6 +21,7 @@ type LoggerConfig struct {
 	Compress   bool   `yaml:"compress"`
 	Level      int    `yaml:"level"`
 	Async      bool   `yaml:"async"`
+	Format     string `yaml:"format"`
 }
 
 // Config 用于表示整个配置文件
