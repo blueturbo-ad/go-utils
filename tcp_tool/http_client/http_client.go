@@ -18,9 +18,9 @@ var (
 
 type HttpClientManager struct {
 	HttpClient [2]map[string]*http.Client
-
-	index   int
-	rwMutex sync.RWMutex
+	conf       *config_manage.HttpClientConfig
+	index      int
+	rwMutex    sync.RWMutex
 }
 
 func GetSingleton() *HttpClientManager {
@@ -85,6 +85,7 @@ func (h *HttpClientManager) UpdateFromFile(confPath string, env string) error {
 func (h *HttpClientManager) BuildClient(e *config_manage.HttpClientConfig) error {
 	h.rwMutex.Lock()
 	defer h.rwMutex.Unlock()
+	h.conf = e
 	h.index = (h.index + 1) % 2
 	h.HttpClient[h.index] = make(map[string]*http.Client)
 
@@ -104,6 +105,15 @@ func (h *HttpClientManager) BuildClient(e *config_manage.HttpClientConfig) error
 			},
 		}
 		h.HttpClient[h.index][v.Name] = &client
+	}
+	return nil
+}
+
+func (h *HttpClientManager) GetHttpClientConf(attrName string) *config_manage.Http1xConfig {
+	for _, v := range *h.conf.Config {
+		if v.Name == attrName {
+			return &v
+		}
 	}
 	return nil
 }
