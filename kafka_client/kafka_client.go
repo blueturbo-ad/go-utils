@@ -2,7 +2,11 @@ package kafkaclient
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/blueturbo-ad/go-utils/config_manage"
 
@@ -19,6 +23,7 @@ type KafkaClientManager struct {
 	Config         [2]map[string]*config_manage.KafkaConfig
 	ConsumerClient [2]map[string]map[string]*kafka.Consumer
 	ProducerClient [2]map[string]*kafka.Producer // 添加 Producer 缓存
+	zone           string
 	index          int
 	rwMutex        sync.RWMutex
 }
@@ -32,12 +37,17 @@ func GetSingleton() *KafkaClientManager {
 }
 
 func NewKafkaClientManager() *KafkaClientManager {
-	return &KafkaClientManager{
+	kafkaManager := &KafkaClientManager{
 		Config:         [2]map[string]*config_manage.KafkaConfig{},
 		ConsumerClient: [2]map[string]map[string]*kafka.Consumer{},
 		ProducerClient: [2]map[string]*kafka.Producer{},
 		index:          -1,
 	}
+	err := kafkaManager.GetRackId()
+	if err != nil {
+		fmt.Printf("Error getting rack ID: %v\n", err)
+	}
+	return kafkaManager
 }
 
 func (k *KafkaClientManager) GetProducerClient(name string) (*kafka.Producer, error) {
@@ -201,6 +211,7 @@ func (k *KafkaClientManager) buildConsumer(conf *config_manage.KafkaConfig, grou
 		"group.id":           group,
 		"auto.offset.reset":  conf.Customer.Reset,
 		"enable.auto.commit": conf.Customer.AutoCommit,
+		"client.rack":        k.zone,
 	}
 	if conf.Customer.Username != EmptyString && conf.Customer.Password != EmptyString {
 		config.SetKey("sasl.username", conf.Customer.Username)
@@ -323,6 +334,31 @@ func (k *KafkaClientManager) CloseAll() {
 // 保持原有的 Close 方法用于向后兼容，但建议使用 CloseAll
 func (k *KafkaClientManager) Close() {
 	k.CloseAll()
+}
+
+func (k *KafkaClientManager) GetRackId() error {
+	client := &http.Client{Timeout: time.Second * 2}
+	req, err := http.NewRequest("GET", "http://metadata.google.internal/computeMetadata/v1/instance/zone", nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Metadata-Flavor", "Google")
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to get rack ID, status code: %d", resp.StatusCode)
+	}
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	parts := strings.Split(string(bodyBytes), "/")
+	k.zone = parts[len(parts)-1]
+	return nil
 }
 
 // func (k *KafkaClientManager) buildProducer(conf *config_manage.KafkaConfig) (*kafka.Writer, error) {

@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/blueturbo-ad/go-utils/environment"
+	"github.com/blueturbo-ad/go-utils/feishu"
 	k8sclient "github.com/blueturbo-ad/go-utils/k8s_tool/k8s_client"
+	"github.com/blueturbo-ad/go-utils/zap_loggerex"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
@@ -42,7 +44,7 @@ func TestKafkaClient(t *testing.T) {
 			fmt.Printf("failed to marshal message: %s\n", err)
 			return
 		}
-		topic := "topic-sg-mis-bid_server-ad_library"
+		topic := "topic-us-mis-bid_server-ad_library"
 		err = p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 			Value:          msgbyte,
@@ -86,23 +88,82 @@ func TestKafkaClient(t *testing.T) {
 		if err != nil {
 			t.Errorf("GetConsumerClient() = %v; want nil", err)
 		}
-		topic := "topic-sg-mis-event_server-budget_pacing"
-		err = c.Subscribe(topic, nil)
-		if err != nil {
-			fmt.Printf("failed to subscribe topic: %s\n", err)
-			return
-		}
-		func() {
-			for {
-				msg, err := c.ReadMessage(-1)
-				if err == nil {
-					fmt.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
-					// c.CommitMessage(msg)
-
-				} else {
-					fmt.Printf("Consumer error: %v (%v)\n", err, msg)
-				}
+		for {
+			topic := "topic-us-mis-bid_server-ad_library"
+			err = c.Subscribe(topic, nil)
+			if err != nil {
+				fmt.Printf("failed to subscribe topic: %s\n", err)
+				return
 			}
-		}()
+
+			metadata, err := c.GetMetadata(&topic, false, int(time.Duration(20*time.Millisecond)))
+			if err != nil {
+				fmt.Printf("failed to get metadata: %s\n", err.Error())
+				zap_loggerex.GetSingleton().Error("bid_stdout_logger", "failed to get metadata, %+v", err)
+
+			}
+			topicMetadata, ok := metadata.Topics[topic]
+			if !ok {
+				fmt.Printf("failed to get topic metadata for topic: %s\n", topic)
+				zap_loggerex.GetSingleton().Error("bid_stdout_logger", "failed to get topic metadata")
+				return
+			}
+			queryPartitions := []kafka.TopicPartition{}
+
+			for _, partition := range topicMetadata.Partitions {
+				queryPartitions = append(queryPartitions, kafka.TopicPartition{
+					Topic:     &topic,
+					Partition: partition.ID,
+					Offset:    kafka.Offset(1761150160107712058),
+				})
+			}
+			resultPartitions, err := c.OffsetsForTimes(queryPartitions, int(time.Duration(20*time.Millisecond)))
+			if err != nil {
+				fmt.Printf("failed to get offsets for times: %s\n", err.Error())
+				zap_loggerex.GetSingleton().Error("bid_stdout_logger", "failed to get offsets for times, %+v", err)
+			}
+			assignPartitions := []kafka.TopicPartition{}
+
+			for _, partition := range resultPartitions {
+				offset := kafka.OffsetEnd
+				if partition.Error != nil {
+					offset = kafka.OffsetEnd
+				} else {
+					if partition.Offset < 0 && partition.Offset != kafka.OffsetEnd {
+						zap_loggerex.GetSingleton().Info("bid_stdout_logger", "invalid offset for partition %d, set to the newest offset", partition.Partition)
+						offset = kafka.OffsetEnd
+					} else {
+						offset = partition.Offset
+					}
+				}
+				fmt.Printf("partition offset info, %+v\n", partition)
+				assignPartitions = append(assignPartitions, kafka.TopicPartition{
+					Topic:     &topic,
+					Partition: partition.Partition,
+					Offset:    offset,
+				})
+			}
+			if err := c.Assign(assignPartitions); err != nil {
+				msg := fmt.Sprintf("failed to assign partitions, %s", err.Error())
+				zap_loggerex.GetSingleton().Error("bid_stdout_logger", "%s", msg)
+				if err := feishu.GetInstance().Send("error", string(msg)); err != nil {
+					zap_loggerex.GetSingleton().Error("bid_stdout_logger", "failed to send feishu alert, %+v", err)
+					fmt.Println(err.Error())
+				}
+
+			}
+			// func() {
+			// 	for {
+			// 		msg, err := c.ReadMessage(-1)
+			// 		if err == nil {
+			// 			fmt.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
+			// 			// c.CommitMessage(msg)
+
+			// 		} else {
+			// 			fmt.Printf("Consumer error: %v (%v)\n", err, msg)
+			// 		}
+			// 	}
+			// }()
+		}
 	})
 }
