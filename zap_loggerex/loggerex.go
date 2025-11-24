@@ -160,7 +160,7 @@ func newZapLogger(conf *config_manage.LoggerConfig) *zap.Logger {
 	lowWriteSyncer := createWriteSyncer(conf, true)
 	highWriteSyncer := createWriteSyncer(conf, false)
 	var funhandle zapcore.Encoder
-	if conf.Format == "cvs" {
+	if conf.Format == "handless" {
 		funhandle = zapcore.NewConsoleEncoder(prodEncoder)
 	} else {
 		funhandle = zapcore.NewJSONEncoder(prodEncoder)
@@ -226,7 +226,7 @@ func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.Wr
 }
 
 func createLogOutputEncoderConfig(conf *config_manage.LoggerConfig) zapcore.EncoderConfig {
-	if conf.Format == "cvs" {
+	if conf.Format == "handless" {
 		return zapcore.EncoderConfig{
 			MessageKey:     "msg",
 			TimeKey:        zapcore.OmitKey,
