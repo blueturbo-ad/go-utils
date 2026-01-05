@@ -1,0 +1,47 @@
+curused: Dev
+Dev:
+  version: 1
+  postgresql_conf:
+    - name: mis_postgresql
+      write_pool:
+        database: blueturbo_business
+        pool_size: 20
+        timeout: 5000
+        port: 5432
+        nodes:
+          - 34.142.238.89
+        user: blueturbo
+        password: 7n<{qqu2pgh97ns~
+      read_pool:
+        write_pool:
+        database: blueturbo_business
+        pool_size: 20
+        timeout: 5000
+        port: 5432
+        nodes:
+          - 34.142.238.89
+        user: blueturbo_read
+        password: Cu5B3%l3M1pRXa0q
+Pro:
+  version: 1
+  postgresql_conf:
+    - name: mis_postgresql
+      write_pool:
+        database: blueturbo_business
+        pool_size: 20
+        timeout: 5000
+        port: 5432
+        nodes:
+          - 34.142.238.89
+        user: blueturbo
+        password: 7n<{qqu2pgh97ns~
+      read_pool:
+        write_pool:
+        database: blueturbo_business
+        pool_size: 20
+        timeout: 5000
+        port: 5432
+        nodes:
+          - 34.142.238.89
+        user: blueturbo_read
+        password: Cu5B3%l3M1pRXa0q
