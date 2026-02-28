@@ -13,13 +13,11 @@ import (
 
 type LoggerConfig struct {
 	Name       string `yaml:"name"`
-	Info       string `yaml:"info"`
-	Error      string `yaml:"error"`
+	FilePath   string `yaml:"file_path"`
 	MaxSize    int    `yaml:"max_size"`
 	MaxBackups int    `yaml:"max_backups"`
 	MaxAge     int    `yaml:"max_age"`
 	Compress   bool   `yaml:"compress"`
-	Level      int    `yaml:"level"`
 	Async      bool   `yaml:"async"`
 	Format     string `yaml:"format"`
 }
@@ -28,6 +26,7 @@ type LoggerConfig struct {
 type ZapLoggerConfig struct {
 	Loggers []LoggerConfig `yaml:"zap_loggers"`
 	Version string         `yaml:"version"`
+	Level   int            `yaml:"level"`
 }
 
 func (l *ZapLoggerConfig) LoadK8sConfigMap(configMapName, env string) error {

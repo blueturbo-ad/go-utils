@@ -48,7 +48,8 @@ func TestGetLogger(t *testing.T) {
 		}
 
 		logger.Info("handle_logger_1", "{\"adx\":\"domob\",\"bid\":\"d43996a5-0198-1000-d01b-7d0717700030\",\"bid_time\":\"2025-08-23 08:00:02\",\"campaign_id\":622,\"creative_id\":8283,\"loss_content\":\"Creative Filtered - Disapproved by Exchange\",\"lossrsn\":\"202\",\"req_id\":\"63cfd00f50dcd-5f3b8bb1-11155157\"}")
-		logger.Info("handle_logger_3", "{\"adx\":\"domob\",\"bid\":\"d43996a5-0198-1000-d01b-7d0717700030\",\"bid_time\":\"2025-08-23 08:00:02\",\"campaign_id\":622,\"creative_id\":8283,\"loss_content\":\"Creative Filtered - Disapproved by Exchange\",\"lossrsn\":\"202\",\"req_id\":\"63cfd00f50dcd-5f3b8bb1-11155157\"}")
+		logger.Warn("handle_logger_1", "{\"adx\":\"domob\",\"bid\":\"d43996a5-0198-1000-d01b-7d0717700030\",\"bid_time\":\"2025-08-23 08:00:02\",\"campaign_id\":622,\"creative_id\":8283,\"loss_content\":\"Creative Filtered - Disapproved by Exchange\",\"lossrsn\":\"202\",\"req_id\":\"63cfd00f50dcd-5f3b8bb1-11155157\"}")
+		logger.Error("handle_logger_1", "{\"adx\":\"domob\",\"bid\":\"d43996a5-0198-1000-d01b-7d0717700030\",\"bid_time\":\"2025-08-23 08:00:02\",\"campaign_id\":622,\"creative_id\":8283,\"loss_content\":\"Creative Filtered - Disapproved by Exchange\",\"lossrsn\":\"202\",\"req_id\":\"63cfd00f50dcd-5f3b8bb1-11155157\"}")
 
 		// logger.Info("handle_logger_1", "2222")
 		// logger.Warn("handle_logger_1", "3333")

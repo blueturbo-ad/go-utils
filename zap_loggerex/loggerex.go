@@ -127,7 +127,7 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 	var loger = new(LoggerEx) //生成新的数据
 
 	for _, value := range config.Loggers {
-		zapLogger := newZapLogger(&value)
+		zapLogger := newZapLogger(&value, config.Level)
 		if zapLogger == nil {
 			return nil
 		}
@@ -145,13 +145,13 @@ func (l *LoggerManager) UpdateLogger(config *config_manage.ZapLoggerConfig) erro
 	return nil
 }
 
-func newZapLogger(conf *config_manage.LoggerConfig) *zap.Logger {
+func newZapLogger(conf *config_manage.LoggerConfig, level int) *zap.Logger {
 	highPriority := zap.LevelEnablerFunc(func(lev zapcore.Level) bool {
-		return lev >= zap.WarnLevel && lev >= zapcore.Level(conf.Level)
+		return lev >= zap.WarnLevel && lev >= zapcore.Level(level)
 	})
 
 	lowPriority := zap.LevelEnablerFunc(func(lev zapcore.Level) bool {
-		return lev < zap.WarnLevel && lev >= zap.DebugLevel && lev >= zapcore.Level(conf.Level)
+		return lev < zap.WarnLevel && lev >= zap.DebugLevel && lev >= zapcore.Level(level)
 	})
 
 	prodEncoder := createLogOutputEncoderConfig(conf)
@@ -187,12 +187,12 @@ func builFilePath(info string) string {
 
 func createWriteSyncer(conf *config_manage.LoggerConfig, isinfo bool) zapcore.WriteSyncer {
 	var info string
-	if isinfo || containsString(globalLogName, conf.Name) {
-		info = conf.Info
-	} else {
-		info = conf.Error
-	}
-
+	// if isinfo || containsString(globalLogName, conf.Name) {
+	// 	info = conf.Info
+	// } else {
+	// 	info = conf.Error
+	// }
+	info = conf.FilePath
 	if len(info) == 0 {
 		log.Printf("LoggerEx logger path length is 0")
 	}
@@ -376,7 +376,7 @@ func (l *LoggerWrapper) Warn(format string, fields ...any) error {
 }
 
 func (l *LoggerWrapper) Error(format string, fields ...any) error {
-	checkedEntry := l.ZapLogger.Check(zapcore.WarnLevel, EmptyString)
+	checkedEntry := l.ZapLogger.Check(zapcore.ErrorLevel, EmptyString)
 	if checkedEntry == nil {
 		return fmt.Errorf("LoggerWrapper Error is nil")
 	}
